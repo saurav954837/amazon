@@ -1,12 +1,13 @@
 # Amazon – Ecommerce Full-Stack Web System 🛒
 
-> Amazon-like E-commerce Web Application
+> Amazon-like E-commerce Web Application (Full-Stack Web App)
 > Developed by **Ahmed Medhat**
 
 <div align="center">
   <img src="https://i0.wp.com/magzoid.com/wp-content/uploads/2025/05/amazon-rebrand-2025_dezeen_2364_col_1-1.webp?fit=2364%2C1330&ssl=1" alt="Amazon Logo" width="500" />
 </div>
 
+---
 ## 📋 Project Overview
 **Amazon** is a full-stack e-commerce web application built to deliver a seamless online shopping experience for customers and powerful management tools for sellers and administrators. The platform allows users to browse products, manage carts and orders, track shipments in real time, and complete secure payments.
 

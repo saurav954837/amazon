@@ -1,7 +1,13 @@
 # Amazon – Ecommerce Full-Stack Web System 🛒
 
-![Amazon Logo](https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg)  
+> Amazon-like E-commerce Web Application (Database)
+> Developed by **Ahmed Medhat**
 
+<div align="center">
+  <img src="https://i0.wp.com/magzoid.com/wp-content/uploads/2025/05/amazon-rebrand-2025_dezeen_2364_col_1-1.webp?fit=2364%2C1330&ssl=1" alt="Amazon Logo" width="500" />
+</div>
+
+--- 
 ## 📋 Database Overview
 The **Amazon** Database is a *MySQL-based* relational database designed to support a full-featured e-commerce platform. This schema implements core e-commerce functionality including user management, product catalog, shopping cart, order processing, and reviews system. The database follows normalization principles while maintaining simplicity for development and portfolio demonstration.
 
