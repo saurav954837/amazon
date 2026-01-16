@@ -26,33 +26,38 @@ For sellers and administrators, the system provides comprehensive tools to manag
 ### Backend (ExpressJS – MVC Architecture)
 ```
 server/
-│   ├── config/
-│   │   ├── db_config.js
-│   │   └── settings.js
+├── app/
 │   ├── controllers/
 │   │   ├── authController.js
 │   │   └── productController.js
 │   ├── models/
-│   │   ├── User.js
-│   │   └── Product.js
-│   ├── routes/
-│   │   ├── authRoutes.route.js
-│   │   └── productRoutes.route.js
-│   ├── middleware/
+│   │   ├── Product.js
+│   │   └── User.js
+│   ├── middlewares/
 │   │   ├── adminMiddleware.js
 │   │   ├── authMiddleware.js
 │   │   └── validationMiddleware.js
-│   ├── utils/
-│   │   └── jwt.js
-│   ├── validations/
-│   │   ├── authValidation.js
-│   │   └── productValidation.js
-│   └── server.js
-├── .env
+│   └── validations/
+│       ├── authValidation.js
+│       └── productValidation.js
+├── config/
+│   └── database.js
+├── routes/
+│   ├── api/
+│   │   ├── authRoutes.routes.js
+│   │   └── productRoutes.routes.js
+│   └── web/
+│       └── license.js
+├── utils/
+│   └── jwt.js
+├── tests/
+│   └── test-connection.js
+├── public/
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
-└── README.md
+├── README.md
+└── server.js
 ```
 
 ### Frontend (ReactJS + Bootstrap/Tailwind)
@@ -127,17 +132,37 @@ client/
 
 ---
 ## 🛠️ Technologies Used
-| Technology                                                                                                                | Purpose             | Version |
-| ------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------- |
-| ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=nodedotjs\&logoColor=white)              | Runtime Environment | 18.x+   |
-| ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge\&logo=express\&logoColor=white)          | Backend Framework   | 4.x     |
-| ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge\&logo=react\&logoColor=61DAFB)                     | Frontend Library    | 18.x    |
-| ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge\&logo=mysql\&logoColor=white)                      | Database            | 8.x     |
-| ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge\&logo=jsonwebtokens\&logoColor=white)                  | Authentication      | 9.x     |
-| ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge\&logo=bootstrap\&logoColor=white)          | CSS Framework       | 5.x     |
-| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge\&logo=axios\&logoColor=white)                      | HTTP Client         | 1.x     |
-| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge\&logo=react-router\&logoColor=white) | Routing             | 6.x     |
-| ![Font Awesome](https://img.shields.io/badge/Font_Awesome-528DD7?style=for-the-badge\&logo=font-awesome\&logoColor=white) | Icons               | 6.x     |
+
+### 🖥️ Backend Technologies
+| Technology                                                                                                                | Purpose                           | Version |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
+| ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)                | JavaScript Runtime Environment    | 18.x+   |
+| ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)            | Web Application Framework         | 4.x     |
+| ![Rate Limit](https://img.shields.io/badge/Express_Rate_Limit-FF0000?style=for-the-badge&logoColor=white)                 | API Rate Limiting Middleware      | 7.x     |
+| ![Helmet](https://img.shields.io/badge/Helmet-000000?style=for-the-badge&logo=helmet&logoColor=white)                     | Security Headers Middleware       | 7.x     |
+| ![CORS](https://img.shields.io/badge/CORS-000000?style=for-the-badge&logo=cors&logoColor=white)                           | Cross-Origin Resource Sharing     | 2.x     |
+| ![Bcrypt](https://img.shields.io/badge/Bcrypt-000000?style=for-the-badge&logo=bcrypt&logoColor=white)                     | Password Hashing Library          | 5.x     |
+| ![Cookie Parser](https://img.shields.io/badge/Cookie_Parser-FF6B6B?style=for-the-badge&logoColor=white)                   | Cookie Parsing Middleware         | 1.x     |
+| ![Morgan](https://img.shields.io/badge/Morgan-000000?style=for-the-badge&logo=morgan&logoColor=white)                     | HTTP Request Logger               | 1.x     |
+| ![Nodemon](https://img.shields.io/badge/Nodemon-76D04B?style=for-the-badge&logo=nodemon&logoColor=white)                  | Development Server Auto-Restart   | 3.x     |
+| ![Dotenv](https://img.shields.io/badge/Dotenv-000000?style=for-the-badge&logo=dotenv&logoColor=white)                     | Environment Variables Loader      | 16.x    |
+| ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)                    | JSON Web Tokens Authentication    | 9.x     |
+| ![MySQL2](https://img.shields.io/badge/MySQL2-005C84?style=for-the-badge&logo=mysql&logoColor=white)                      | MySQL Database Driver             | 3.x     |
+
+### 🎨 Frontend Technologies
+| Technology                                                                                                                | Purpose                           | Version |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
+| ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)                       | Frontend JavaScript Library       | 18.x    |
+| ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)            | CSS Framework for Styling         | 5.x     |
+| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                        | HTTP Client for API Calls         | 1.x     |
+| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)   | Client-side Routing               | 6.x     |
+| ![Font Awesome](https://img.shields.io/badge/Font_Awesome-528DD7?style=for-the-badge&logo=font-awesome&logoColor=white)   | Icon Library                      | 6.x     |
+
+### 🗄️ Database & Tools
+| Technology                                                                                                                | Purpose                           | Version |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
+| ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)                        | Relational Database               | 8.x     |
+| ![MySQL Workbench](https://img.shields.io/badge/MySQL_Workbench-4479A1?style=for-the-badge&logo=mysql&logoColor=white)    | Database Design & Management      | 8.x     |
 
 ---
 ## ✨ Core Features
@@ -187,13 +212,17 @@ client/
 * `POST /api/auth/register` – Register new user
 * `POST /api/auth/login` – User login
 * `POST /api/auth/logout` – User logout
-* `GET /api/auth/verify` – Verify JWT token
+* `POST /api/auth/refresh-token` – Refresh JWT token
+* `GET /api/auth/profile` – Retrieve user profile
+* `PUT /api/auth/profile` – Update user profile
+* `PUT /api/auth/change-password` – Change user password
 
 ### Products
 * `GET /api/products` – Get products (Admin: all / User: own)
 * `GET /api/products/:product_id` – Get products via id/search
 * `POST /api/products` – Create products (Admins only)
 * `PUT /api/products/:product_id` – Update products (Admins only)
+* `PATCH /api/products/:product_id` – Partially update product (Admins only)
 * `DELETE /api/products/:id` – Delete products (Admins only) 
 
 ---
