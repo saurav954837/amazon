@@ -97,7 +97,7 @@ CREATE TABLE products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
     product_name VARCHAR(255) NOT NULL,
     product_category VARCHAR(55) NOT NULL,
-    product_description TEXT,
+    product_desc TEXT,
     product_image VARCHAR(255),
     product_quantity INT NOT NULL,
     product_price DECIMAL(10, 2) NOT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE cart (
 **Purpose:** Temporary storage for user's shopping cart items before checkout.
 
 ### 📋 orders – Order Management
-```
+```sql
 CREATE TABLE orders (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -143,7 +143,7 @@ CREATE TABLE orders (
 **Purpose:** Stores order headers with shipping, payment, and status information.
 
 ### 📦 order_items – Order Line Items
-```
+```sql
 CREATE TABLE order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
@@ -158,7 +158,7 @@ CREATE TABLE order_items (
 **Purpose:** Stores individual products within each order with snapshot pricing.
 
 ### ⭐ reviews – Product Reviews & Ratings
-```
+```sql
 CREATE TABLE reviews (
     review_id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
@@ -181,7 +181,7 @@ This is a **proprietary project**. External contributions are **not accepted**.
 ---
 ## 📄 License
 **PROPRIETARY LICENSE**
-© 2025 Ahmed Medhat. All Rights Reserved.
+© 2026 - Ahmed Medhat. All Rights Reserved.
 This project is a personal, non-commercial work created solely for the purpose of demonstrating full-stack web development skills.
 
 The name **Amazon** is used strictly as a conceptual reference for learning and portfolio demonstration purposes only. This project is not affiliated with, endorsed by, sponsored by, or connected to Amazon.com, Inc. or any of its subsidiaries.

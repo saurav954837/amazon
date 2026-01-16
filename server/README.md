@@ -116,7 +116,7 @@ This is a **proprietary project**. External contributions are **not accepted**.
 ---
 ## 📄 License
 **PROPRIETARY LICENSE**
-© 2025 Ahmed Medhat. All Rights Reserved.
+© 2026 Ahmed Medhat. All Rights Reserved.
 This project is a personal, non-commercial work created solely for the purpose of demonstrating full-stack web development skills.
 
 The name **Amazon** is used strictly as a conceptual reference for learning and portfolio demonstration purposes only. *This project is not affiliated with, endorsed by, sponsored by, or connected to Amazon.com, Inc. or any of its subsidiaries*.
