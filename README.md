@@ -149,6 +149,7 @@ client/
 | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)                    | JSON Web Tokens Authentication    | 9.x     |
 | ![MySQL2](https://img.shields.io/badge/MySQL2-005C84?style=for-the-badge&logo=mysql&logoColor=white)                      | MySQL Database Driver             | 3.x     |
 
+
 ### 🎨 Frontend Technologies
 | Technology                                                                                                                | Purpose                           | Version |
 | ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
@@ -157,6 +158,7 @@ client/
 | ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                        | HTTP Client for API Calls         | 1.x     |
 | ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)   | Client-side Routing               | 6.x     |
 | ![Font Awesome](https://img.shields.io/badge/Font_Awesome-528DD7?style=for-the-badge&logo=font-awesome&logoColor=white)   | Icon Library                      | 6.x     |
+
 
 ### 🗄️ Database & Tools
 | Technology                                                                                                                | Purpose                           | Version |

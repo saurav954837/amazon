@@ -21,6 +21,14 @@ The **Amazon** Database is a *MySQL-based* relational database designed to suppo
 **License:** Proprietary – All rights reserved
 
 ---
+## 🗄️ Database Technologies Used
+
+| Technology                                                                                                                | Purpose                           | Version |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
+| ![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)                        | Relational Database               | 8.x     |
+| ![MySQL Workbench](https://img.shields.io/badge/MySQL_Workbench-4479A1?style=for-the-badge&logo=mysql&logoColor=white)    | Database Design & Management      | 8.x     |
+
+---
 ## 🏗️ Project Structure
 ### Database (MySql)
 ```

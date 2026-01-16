@@ -22,6 +22,17 @@ For sellers and administrators, the system provides comprehensive tools to manag
 > Coming soon...
 
 ---
+## 🎨 Frontend Technologies Used
+
+| Technology                                                                                                                | Purpose                           | Version |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------- |
+| ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)                       | Frontend JavaScript Library       | 18.x    |
+| ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)            | CSS Framework for Styling         | 5.x     |
+| ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                        | HTTP Client for API Calls         | 1.x     |
+| ![React Router](https://img.shields.io/badge/React_Router-CA4245?style=for-the-badge&logo=react-router&logoColor=white)   | Client-side Routing               | 6.x     |
+| ![Font Awesome](https://img.shields.io/badge/Font_Awesome-528DD7?style=for-the-badge&logo=font-awesome&logoColor=white)   | Icon Library                      | 6.x     |
+
+---
 ## 🏗️ Project Structure
 ### Frontend (ReactJS + Bootstrap/Tailwind)
 ```
