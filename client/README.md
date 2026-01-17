@@ -41,6 +41,12 @@ client/
 │   ├── public/
 │   │   └── amazon.jpg
 │   ├── src/
+│   │   ├── app/
+│   │   │    ├── components/ # All app components
+│   │   │    ├── layout/ # Main Layout
+│   │   │    ├── context/ # App context 
+│   │   │    ├── styles/ # Css style module for each component
+│   │   │    └── ui/ # UI 
 │   │   ├── assets/
 │   │   ├── App.css
 │   │   ├── App.jsx

@@ -1,0 +1,163 @@
+.navbar {
+  background-color: var(--amazon-dark);
+  border-bottom: 1px solid #3a4553;
+  position: sticky;
+  top: 60px;
+  z-index: 999;
+}
+
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.navContent {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.allCategoriesBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.allCategoriesBtn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.menuIcon {
+  font-size: 16px;
+}
+
+.navLinks {
+  display: flex;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.navLinks::-webkit-scrollbar {
+  display: none;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  padding: 10px 15px;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+  border-radius: 3px;
+}
+
+.navLink:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.categoryIcon {
+  font-size: 14px;
+}
+
+.moreBtn {
+  background: none;
+  border: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+  border-radius: 3px;
+}
+
+.moreBtn:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.allCategoriesDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid var(--amazon-gray);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  min-width: 300px;
+  z-index: 1000;
+}
+
+.dropdownContent {
+  padding: 20px;
+}
+
+.dropdownGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--amazon-text);
+  padding: 8px 12px;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.dropdownItem:hover {
+  background-color: var(--amazon-light);
+}
+
+.dropdownIcon {
+  font-size: 16px;
+  width: 20px;
+}
+
+@media (max-width: 768px) {
+  .navContent {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .navContent::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .allCategoriesBtn {
+    padding: 10px;
+  }
+  
+  .navLink {
+    padding: 10px;
+  }
+  
+  .navLink span {
+    display: none;
+  }
+  
+  .categoryIcon {
+    font-size: 16px;
+  }
+}

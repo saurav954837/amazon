@@ -1,0 +1,413 @@
+.header {
+  background-color: var(--amazon-dark);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.topBar {
+  padding: 10px 0;
+}
+
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.topBarContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logoSection {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 200px;
+}
+
+.logo {
+  display: flex;
+  align-items: flex-end;
+  text-decoration: none;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.logoText {
+  color: white;
+  font-family: 'Amazon Ember', Arial, sans-serif;
+  letter-spacing: -1px;
+}
+
+.domain {
+  color: var(--amazon-orange);
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.deliveryInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.deliveryInfo:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.locationIcon {
+  font-size: 18px;
+  color: white;
+}
+
+.deliveryText {
+  display: flex;
+  flex-direction: column;
+}
+
+.deliverTo {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.location {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.searchSection {
+  flex: 1;
+  max-width: 800px;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 300px;
+  justify-content: flex-end;
+}
+
+.languageSelector {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.languageSelector:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.userMenuContainer {
+  position: relative;
+}
+
+.userMenu {
+  position: relative;
+}
+
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.accountButton:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.accountInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hello {
+  font-size: 12px;
+  color: #ccc;
+  display: block;
+  line-height: 1.2;
+}
+
+.accountText {
+  font-size: 14px;
+  font-weight: bold;
+  display: block;
+  line-height: 1.2;
+}
+
+.dropdownIcon {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.dropdownIcon.rotated {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 280px;
+  background: white;
+  border: 1px solid var(--amazon-gray);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 1001;
+  margin-top: 5px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+  border-bottom: 1px solid var(--amazon-gray);
+}
+
+.dropdownHeaderIcon {
+  font-size: 32px;
+  color: var(--amazon-blue);
+}
+
+.dropdownHeader div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dropdownHeader strong {
+  font-size: 14px;
+  color: var(--amazon-text);
+}
+
+.dropdownHeader span {
+  font-size: 12px;
+  color: var(--amazon-dark-gray);
+}
+
+.dropdownSection {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--amazon-gray);
+}
+
+.dropdownSection:last-child {
+  border-bottom: none;
+}
+
+.dropdownSection h4 {
+  font-size: 12px;
+  color: var(--amazon-dark-gray);
+  padding: 0 16px 8px;
+  margin: 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--amazon-text);
+  transition: background-color 0.2s;
+}
+
+.dropdownItem:hover {
+  background-color: var(--amazon-light);
+}
+
+.dropdownItem svg {
+  width: 16px;
+  color: var(--amazon-dark-gray);
+}
+
+.dropdownFooter {
+  padding: 12px 16px;
+  background: var(--amazon-light);
+  border-radius: 0 0 8px 8px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background: var(--amazon-orange);
+  color: var(--amazon-dark);
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #ff8c00;
+}
+
+.authButtons {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.authButtons:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.signInBtn {
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.orders {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.orders:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.returns {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.ordersText {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.cart {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 3px;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.cart:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+.cartIcon {
+  font-size: 24px;
+}
+
+.cartCount {
+  position: absolute;
+  top: 5px;
+  left: 20px;
+  background-color: var(--amazon-orange);
+  color: var(--amazon-dark);
+  font-size: 12px;
+  font-weight: bold;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartText {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+@media (max-width: 1200px) {
+  .topBarContent {
+    flex-wrap: wrap;
+  }
+  
+  .searchSection {
+    order: 3;
+    flex: 1 100%;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .logoSection {
+    min-width: auto;
+  }
+  
+  .userSection {
+    min-width: auto;
+    gap: 10px;
+  }
+  
+  .languageSelector,
+  .orders {
+    display: none;
+  }
+  
+  .dropdownMenu {
+    position: fixed;
+    top: 60px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+};

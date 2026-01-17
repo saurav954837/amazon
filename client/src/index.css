@@ -1,0 +1,166 @@
+@import url('https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --amazon-orange: #ff9900;
+  --amazon-dark: #232f3e;
+  --amazon-blue: #146eb4;
+  --amazon-light: #f7f8fa;
+  --amazon-text: #0f1111;
+  --amazon-gray: #ddd;
+  --amazon-dark-gray: #565959;
+  --amazon-green: #007600;
+  --amazon-yellow: #ffd814;
+  --amazon-red: #cc0c39;
+}
+
+body {
+  font-family: 'Amazon Ember', Arial, sans-serif;
+  background-color: var(--amazon-light);
+  color: var(--amazon-text);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+.error-boundary,
+.route-error,
+.network-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 20px;
+  text-align: center;
+}
+
+.error-content,
+.error-container {
+  max-width: 500px;
+  padding: 40px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.error-content h1,
+.error-container h1 {
+  font-size: 32px;
+  color: var(--amazon-dark);
+  margin-bottom: 16px;
+}
+
+.error-content h2 {
+  font-size: 24px;
+  color: var(--amazon-dark);
+  margin-bottom: 12px;
+}
+
+.error-message {
+  color: var(--amazon-red);
+  font-size: 14px;
+  margin: 16px 0;
+  padding: 12px;
+  background: rgba(204, 12, 57, 0.1);
+  border-radius: 6px;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.retry-btn,
+.btn-primary,
+.btn-secondary {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.retry-btn {
+  background: var(--amazon-orange);
+  color: var(--amazon-dark);
+  border: none;
+}
+
+.retry-btn:hover {
+  background: #ff8c00;
+}
+
+.btn-primary {
+  background: var(--amazon-blue);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #0d5a9e;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--amazon-dark);
+  border: 2px solid var(--amazon-gray);
+}
+
+.btn-secondary:hover {
+  border-color: var(--amazon-blue);
+  background: var(--amazon-light);
+}
+
+.home-link {
+  color: var(--amazon-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+  color: var(--amazon-orange);
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.app-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7f8fa 0%, #e7e9ec 100%);
+}
+
+.loading-text {
+  margin-top: 20px;
+  color: var(--amazon-dark);
+  font-size: 18px;
+  font-weight: 500;
+}
