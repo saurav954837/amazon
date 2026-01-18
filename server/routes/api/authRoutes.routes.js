@@ -17,6 +17,8 @@ authRouter.post("/login", validate(loginValidator), authController.login);
 authRouter.post("/logout", authController.logout);
 authRouter.post("/refresh-token", validate(refreshTokenValidator), authController.refreshToken);
 
+authRouter.get("/verify", authenticate, authController.verify);
+
 authRouter.get("/profile", authenticate, authController.profile);
 authRouter.put("/profile", authenticate, validate(updateProfileValidator), authController.updateProfile);
 authRouter.put("/change-password", authenticate, validate(changePasswordValidator), authController.changePassword);

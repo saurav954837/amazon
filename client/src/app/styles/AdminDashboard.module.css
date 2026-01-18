@@ -1,0 +1,363 @@
+.adminContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+}
+
+.adminHeader {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.headerWrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 4.5rem;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.adminLogo {
+    width: 3rem;
+    height: 3rem;
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+.brandInfo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60A5FA 0%, #93C5FD 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brandInfo p {
+    color: #94A3B8;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.viewSwitch {
+    padding: 0.625rem 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #E2E8F0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.viewSwitch:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.adminLogout {
+    padding: 0.625rem 1.5rem;
+    background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.adminLogout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.dashboardContent {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.statsOverview {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .statsOverview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .statsOverview {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.statTile {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.statTile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+    opacity: 0.7;
+}
+
+.statTile:hover {
+    transform: translateY(-5px);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.statContent {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.statIcon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.statInfo p {
+    color: #94A3B8;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.statInfo .value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+}
+
+.modulesSection {
+    margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #60A5FA 0%, #93C5FD 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.modulesGrid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .modulesGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .modulesGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.moduleCard {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.moduleCard:hover {
+    transform: translateY(-8px);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.moduleCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.moduleCard:hover::before {
+    opacity: 1;
+}
+
+.moduleIcon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.moduleTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.moduleDescription {
+    color: #94A3B8;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+}
+
+.activitySection {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.25rem;
+    overflow: hidden;
+}
+
+.activityHeader {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.activityHeader h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.activityContent {
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.emptyActivity {
+    color: #94A3B8;
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+}
+
+.emptySubtext {
+    color: #64748B;
+    font-size: 0.9375rem;
+}
+
+/* Color classes for icons */
+.iconBlue {
+    background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+}
+
+.iconGreen {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.iconYellow {
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+}
+
+.iconPurple {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+}
+
+.iconGray {
+    background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+}
+
+.iconEmerald {
+    background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+}
+
+/* Stats icon backgrounds */
+.statsIconBlue {
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.statsIconGreen {
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.statsIconYellow {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.statsIconEmerald {
+    color: #10B981;
+    background: rgba(16, 185, 129, 0.1);
+}

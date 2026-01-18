@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/authHook.js';
 import Loader from '../../ui/Loader.jsx';
 
 const RequireAuth = ({ children, requireAdmin = false }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth()
+  const { isAuthenticated, isAdmin, loading, user } = useAuth()
   const location = useLocation()
 
   if (loading) {
@@ -14,7 +14,7 @@ const RequireAuth = ({ children, requireAdmin = false }) => {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

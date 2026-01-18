@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faChevronLeft, 
+import { faUser, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import {
+  faChevronLeft,
   faChevronRight,
   faFastBackward,
   faFastForward
 } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
+import { useAuth } from '../hooks/authHook.js';
 import styles from '../styles/Homepage.module.css';
 
 const MemoizedProductCard = memo(ProductCard);
@@ -17,12 +19,12 @@ const Homepage = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [productsPerPage, setProductsPerPage] = useState(8)
-  
+  const [productsPerPage] = useState(8)
+
   const { products, loading, error } = useProduct()
+  const { isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
-  
-  // Ref for scrolling to top
+
   const topOfPageRef = useRef(null)
 
   const heroSlides = [
@@ -30,28 +32,28 @@ const Homepage = () => {
       id: 1,
       title: 'Up to 70% off | Deals on electronics',
       image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1500&q=80',
-      link: '/deals/electronics',
+      link: '',
       mobileImage: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 2,
       title: 'Home refresh made easy',
       image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=1500&q=80',
-      link: '/deals/home',
+      link: '',
       mobileImage: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 3,
       title: 'Fashion deals you will love',
       image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1500&q=80',
-      link: '/deals/fashion',
+      link: '',
       mobileImage: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 4,
       title: 'Top picks for your home',
       image: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1500&q=80',
-      link: '/deals/kitchen',
+      link: '',
       mobileImage: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80'
     }
   ]
@@ -73,14 +75,11 @@ const Homepage = () => {
   // Handle page change with scroll to top
   const handlePageChange = useCallback((pageNumber) => {
     setCurrentPage(pageNumber)
-    
-    // Scroll to top after a small delay to ensure page update
     setTimeout(() => {
       scrollToTop()
     }, 100)
   }, [scrollToTop])
 
-  // Updated pagination handlers with scroll to top
   const nextPage = useCallback(() => {
     const nextPageNum = Math.min(currentPage + 1, totalPages)
     setCurrentPage(nextPageNum)
@@ -103,23 +102,23 @@ const Homepage = () => {
     scrollToTop()
   }, [totalPages, scrollToTop])
 
-  // Handle page size change with scroll to top
-  const handlePageSizeChange = useCallback((e) => {
-    const newPageSize = Number(e.target.value)
-    setProductsPerPage(newPageSize)
-    setCurrentPage(1)
-    scrollToTop()
-  }, [scrollToTop])
-
   const handleProductAction = useCallback((action, productId) => {
-    navigate('/register', { 
-      state: { 
-        redirect: '/checkout',
-        message: `Please sign up to ${action} this product`,
-        productId: productId
+    if (!isAuthenticated) {
+      navigate('/login', {
+        state: {
+          redirect: '/products',
+          message: `Please login to ${action} this product`,
+          productId: productId
+        }
+      })
+    } else {
+      if (action === 'add to cart') {
+        console.log('Adding to cart:', productId)
+      } else if (action === 'buy') {
+        console.log('Buying product:', productId)
       }
-    })
-  }, [navigate])
+    }
+  }, [isAuthenticated, navigate])
 
   const nextSlide = useCallback(() => {
     if (isTransitioning) return;
@@ -135,17 +134,44 @@ const Homepage = () => {
     setTimeout(() => setIsTransitioning(false), 500);
   }, [heroSlides.length, isTransitioning])
 
-  useEffect(() => {
-    const interval = setInterval(nextSlide, 7000)
-    return () => clearInterval(interval)
-  }, [nextSlide])
-
   const handleIndicatorClick = useCallback((index) => {
     if (isTransitioning || index === currentSlide) return;
     setIsTransitioning(true);
     setCurrentSlide(index);
     setTimeout(() => setIsTransitioning(false), 500);
   }, [currentSlide, isTransitioning])
+
+  useEffect(() => {
+    const interval = setInterval(nextSlide, 7000)
+    return () => clearInterval(interval)
+  }, [nextSlide])
+
+  // Generate page numbers
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxPagesToShow = 5
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      let startPage = Math.max(1, currentPage - 2)
+      let endPage = Math.min(totalPages, currentPage + 2)
+
+      if (currentPage <= 3) {
+        endPage = maxPagesToShow
+      } else if (currentPage >= totalPages - 2) {
+        startPage = totalPages - maxPagesToShow + 1
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i)
+      }
+    }
+
+    return pageNumbers
+  }
 
   // Show loading state
   if (loading) {
@@ -170,35 +196,46 @@ const Homepage = () => {
     )
   }
 
-  // Generate page numbers
-  const getPageNumbers = () => {
-    const pageNumbers = []
-    const maxPagesToShow = 5
-    
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pageNumbers.push(i)
-      }
-    } else {
-      let startPage = Math.max(1, currentPage - 2)
-      let endPage = Math.min(totalPages, currentPage + 2)
-      
-      if (currentPage <= 3) {
-        endPage = maxPagesToShow
-      } else if (currentPage >= totalPages - 2) {
-        startPage = totalPages - maxPagesToShow + 1
-      }
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i)
-      }
-    }
-    
-    return pageNumbers
-  }
-
   return (
     <div className={styles.homepage} ref={topOfPageRef}>
+      {isAuthenticated && (
+        <div className={styles.welcomeBanner}>
+          {/* Add floating particles for visual effect */}
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={i}
+              className={styles.welcomeParticle}
+              style={{
+                width: "20px",
+                height: "20px",
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${Math.random() * 10 + 10}s`
+              }}
+            />
+          ))}
+
+          <div className={styles.welcomeContent}>
+            <div className={styles.welcomeText}>
+              <div className={styles.userIcon}>
+                <FontAwesomeIcon icon={faUser} />
+              </div>
+              <div className={styles.userGreeting}>
+                Welcome back, <span className={styles.userName}>{user?.first_name} {user?.last_name}</span>
+              </div>
+            </div>
+
+            <button
+              className={`${styles.dashboardBtn} ${user?.role === 'admin' ? styles.admin : styles.user}`}
+              onClick={() => navigate(user?.role === 'admin' ? '/admin-dashboard' : '/dashboard')}
+            >
+              {user?.role === 'admin' ? 'Admin Dashboard' : 'My Dashboard'}
+              <FontAwesomeIcon icon={faArrowRight} />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className={styles.heroSection}>
         <div className={styles.heroCarousel}>
           <div className={styles.slidesContainer} style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
@@ -210,8 +247,8 @@ const Homepage = () => {
               >
                 <picture>
                   <source media="(max-width: 768px)" srcSet={slide.mobileImage} />
-                  <img 
-                    src={slide.image} 
+                  <img
+                    src={slide.image}
                     alt={slide.title}
                     className={styles.slideImage}
                     loading={slide.id === 1 ? "eager" : "lazy"}
@@ -226,24 +263,24 @@ const Homepage = () => {
               </div>
             ))}
           </div>
-          
-          <button 
-            className={styles.carouselBtn} 
+
+          <button
+            className={styles.carouselBtn}
             onClick={prevSlide}
             aria-label="Previous slide"
             disabled={isTransitioning}
           >
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
-          <button 
-            className={`${styles.carouselBtn} ${styles.nextBtn}`} 
+          <button
+            className={`${styles.carouselBtn} ${styles.nextBtn}`}
             onClick={nextSlide}
             aria-label="Next slide"
             disabled={isTransitioning}
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
-          
+
           <div className={styles.carouselIndicators}>
             {heroSlides.map((_, index) => (
               <button
@@ -261,18 +298,18 @@ const Homepage = () => {
 
       <div className={styles.container}>
         {/* All Products Section with Pagination */}
-        <section 
-          className={styles.allProductsSection} 
+        <section
+          className={styles.allProductsSection}
           aria-labelledby="all-products"
         >
           <div className={styles.sectionHeader}>
             <h2 id="all-products" className={styles.sectionTitle}>
               All Products <span className={styles.productCount}>({products.length} products)</span>
             </h2>
-            
+
             {/* Optional: Add a "Back to Top" button */}
             {products.length > productsPerPage && (
-              <button 
+              <button
                 className={styles.backToTopBtn}
                 onClick={scrollToTop}
                 aria-label="Scroll to top of page"
@@ -281,15 +318,16 @@ const Homepage = () => {
               </button>
             )}
           </div>
-          
+
           {/* Product Grid */}
           <div className={styles.productsGrid}>
             {currentProducts.map(product => (
-              <MemoizedProductCard 
-                key={product.product_id || product.id} 
-                product={product} 
+              <MemoizedProductCard
+                key={product.product_id || product.id}
+                product={product}
                 onAddToCart={() => handleProductAction('add to cart', product.product_id || product.id)}
                 onBuyNow={() => handleProductAction('buy', product.product_id || product.id)}
+                isAuthenticated={isAuthenticated}
               />
             ))}
           </div>
@@ -300,7 +338,7 @@ const Homepage = () => {
               <div className={styles.paginationInfo}>
                 Showing {indexOfFirstProduct + 1} - {Math.min(indexOfLastProduct, products.length)} of {products.length} products
               </div>
-              
+
               <nav className={styles.pagination} aria-label="Product pagination">
                 <button
                   className={styles.paginationBtn}
@@ -310,7 +348,7 @@ const Homepage = () => {
                 >
                   <FontAwesomeIcon icon={faFastBackward} />
                 </button>
-                
+
                 <button
                   className={styles.paginationBtn}
                   onClick={prevPage}
@@ -343,7 +381,7 @@ const Homepage = () => {
                 >
                   <FontAwesomeIcon icon={faChevronRight} />
                 </button>
-                
+
                 <button
                   className={styles.paginationBtn}
                   onClick={goToLastPage}
@@ -353,8 +391,6 @@ const Homepage = () => {
                   <FontAwesomeIcon icon={faFastForward} />
                 </button>
               </nav>
-              
-              {/* Products per page selector - REMOVED since you have fixed 8 per page */}
             </div>
           )}
         </section>
@@ -370,16 +406,16 @@ const Homepage = () => {
               { name: 'Beauty & Personal Care', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
               { name: 'Sports & Outdoors', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=300&q=80' },
             ].map((category, index) => (
-              <a 
-                key={index} 
-                href={`/category/${category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`} 
+              <a
+                key={index}
+                href={`/category/${category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
                 className={styles.categoryCard}
                 aria-label={`Browse ${category.name}`}
               >
                 <div className={styles.categoryImageWrapper}>
-                  <img 
-                    src={category.image} 
-                    alt={category.name} 
+                  <img
+                    src={category.image}
+                    alt={category.name}
                     className={styles.categoryImage}
                     loading="lazy"
                   />

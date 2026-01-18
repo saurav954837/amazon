@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSearch, 
-  faShoppingCart, 
+import {
+  faSearch,
+  faShoppingCart,
   faUser,
   faMapMarkerAlt,
   faBars,
@@ -21,7 +21,7 @@ import amazon_logo from "../../assets/amazon-header.png";
 const securityUtils = {
   sanitizeInput: (input) => {
     if (typeof input !== 'string') return '';
-    
+
     const map = {
       '&': '&amp;',
       '<': '&lt;',
@@ -36,7 +36,7 @@ const securityUtils = {
       '{': '&#123;',
       '}': '&#125;'
     };
-    
+
     const sanitizeRegex = /[&<>"'`=(){}]/g;
     return input.replace(sanitizeRegex, (match) => map[match] || match);
   },
@@ -46,11 +46,11 @@ const securityUtils = {
     const cleanPath = path.split('?')[0].split('#')[0];
     const allowedBasePaths = [
       '/',
-      '/profile',
+      '/dashboard',
       '/login',
       '/register',
       '/orders',
-      '/admin',
+      '/admin-dashboard',
       '/cart',
       '/search',
       '/404'
@@ -69,7 +69,7 @@ const securityUtils = {
       '\\',
       ';'
     ];
-    
+
     return !invalidPatterns.some(pattern => path.includes(pattern));
   },
 
@@ -97,7 +97,7 @@ const securityUtils = {
       /\.innerHTML/i,
       /\.outerHTML/i
     ];
-    
+
     return !dangerousPatterns.some(pattern => pattern.test(query));
   },
 
@@ -120,7 +120,7 @@ const createRateLimiter = (limit = 5, interval = 10000) => {
       if (validAttempts.length >= limit) {
         return false;
       }
-      
+
       validAttempts.push(now);
       attempts.set(key, validAttempts);
       return true;
@@ -138,15 +138,13 @@ const Header = ({ onCartClick }) => {
   const [securityError, setSecurityError] = useState('');
   const { user, logout, isAdmin } = useAuth();
   const navigate = useNavigate();
-  
+
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
   const searchInputRef = useRef(null);
-  
+
   const navigationRateLimiter = useRef(createRateLimiter(15, 60000));
   const searchRateLimiter = useRef(createRateLimiter(8, 15000));
-
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -170,17 +168,12 @@ const Header = ({ onCartClick }) => {
       return () => clearTimeout(timer);
     }
   }, [securityError]);
-
-  // Secure navigation function
   const secureNavigate = useCallback((path, options = {}) => {
-    // Validate path
     if (!securityUtils.validatePath(path)) {
       console.warn('Security: Invalid navigation path detected:', path);
       navigate('/404');
       return;
-    }
-
-    // Check rate limiting
+    };
     if (!navigationRateLimiter.current.canProceed(user?.id || 'guest')) {
       setSecurityError('Too many navigation attempts. Please wait a moment.');
       return;
@@ -190,19 +183,13 @@ const Header = ({ onCartClick }) => {
     setShowMobileMenu(false);
   }, [navigate, user]);
 
-  // Handle search submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    
     if (!searchQuery.trim()) return;
-    
-    // Validate search query
     if (!securityUtils.validateSearchQuery(searchQuery)) {
       setSecurityError('Invalid search query detected');
       return;
-    }
-
-    // Check search rate limiting
+    };
     if (!searchRateLimiter.current.canProceed(user?.id || 'guest')) {
       setSecurityError('Too many search attempts. Please wait a moment.');
       return;
@@ -213,26 +200,26 @@ const Header = ({ onCartClick }) => {
     setSearchQuery('');
   };
 
-  // Handle search input change
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    
-    // Basic validation
     if (value.length > 150) {
       setSecurityError('Search query is too long');
       return;
-    }
-    
+    };
     setSearchQuery(value);
     if (securityError) setSecurityError('');
   };
 
-  // Handle user actions
   const handleProfileClick = () => {
     if (user) {
-      secureNavigate('/profile');
+      secureNavigate('/dashboard');
       setShowUserDropdown(false);
-    } else {
+    }
+    else if (isAdmin) {
+      secureNavigate('/admin-dashboard');
+      setShowUserDropdown(false);
+    }
+    else {
       secureNavigate('/login');
     }
   };
@@ -288,7 +275,7 @@ const Header = ({ onCartClick }) => {
         <div className={styles.securityAlert} role="alert" aria-live="assertive">
           <span className={styles.alertIcon}>⚠️</span>
           <span className={styles.alertText}>{securityError}</span>
-          <button 
+          <button
             className={styles.alertClose}
             onClick={() => setSecurityError('')}
             aria-label="Close alert"
@@ -303,7 +290,7 @@ const Header = ({ onCartClick }) => {
         <div className={styles.container}>
           <div className={styles.topBarContent}>
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className={styles.mobileMenuButton}
               onClick={toggleMobileMenu}
               aria-label="Toggle menu"
@@ -314,17 +301,17 @@ const Header = ({ onCartClick }) => {
 
             {/* Logo Section */}
             <div className={styles.logoSection}>
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className={styles.logo}
                 onClick={(e) => {
                   e.preventDefault();
                   secureNavigate('/');
                 }}
               >
-                <img 
-                  src={amazon_logo} 
-                  alt="Amazon" 
+                <img
+                  src={amazon_logo}
+                  alt="Amazon"
                   width={97}
                   height={30}
                   loading="eager"
@@ -334,12 +321,12 @@ const Header = ({ onCartClick }) => {
                   }}
                 />
               </Link>
-              
+
               {/* Delivery Info - Desktop */}
               <div className={styles.deliveryInfo}>
-                <FontAwesomeIcon 
-                  icon={faMapMarkerAlt} 
-                  className={styles.locationIcon} 
+                <FontAwesomeIcon
+                  icon={faMapMarkerAlt}
+                  className={styles.locationIcon}
                   aria-hidden="true"
                 />
                 <div className={styles.deliveryText}>
@@ -351,8 +338,8 @@ const Header = ({ onCartClick }) => {
 
             {/* Search Section */}
             <div className={styles.searchSection}>
-              <form 
-                onSubmit={handleSearchSubmit} 
+              <form
+                onSubmit={handleSearchSubmit}
                 className={styles.searchForm}
                 role="search"
               >
@@ -368,8 +355,8 @@ const Header = ({ onCartClick }) => {
                     aria-label="Search Amazon"
                     aria-describedby="search-instructions"
                   />
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className={styles.searchButton}
                     aria-label="Search"
                   >
@@ -383,12 +370,12 @@ const Header = ({ onCartClick }) => {
             </div>
 
             {/* User Section */}
-            <div className={styles.userSection}>              
+            <div className={styles.userSection}>
               {/* User Menu */}
               <div className={styles.userMenuContainer} ref={dropdownRef}>
                 {user ? (
                   <div className={styles.userMenu}>
-                    <button 
+                    <button
                       className={styles.accountButton}
                       onClick={() => setShowUserDropdown(!showUserDropdown)}
                       aria-expanded={showUserDropdown}
@@ -401,23 +388,23 @@ const Header = ({ onCartClick }) => {
                         </span>
                         <span className={styles.accountText}>Account & Lists</span>
                       </div>
-                      <FontAwesomeIcon 
-                        icon={faChevronDown} 
+                      <FontAwesomeIcon
+                        icon={faChevronDown}
                         className={`${styles.dropdownIcon} ${showUserDropdown ? styles.rotated : ''}`}
                         aria-hidden="true"
                       />
                     </button>
-                    
+
                     {showUserDropdown && (
-                      <div 
+                      <div
                         className={styles.dropdownMenu}
                         role="menu"
                         aria-label="Account options"
                       >
                         <div className={styles.dropdownHeader}>
-                          <FontAwesomeIcon 
-                            icon={faUserCircle} 
-                            className={styles.dropdownHeaderIcon} 
+                          <FontAwesomeIcon
+                            icon={faUserCircle}
+                            className={styles.dropdownHeaderIcon}
                             aria-hidden="true"
                           />
                           <div>
@@ -427,19 +414,19 @@ const Header = ({ onCartClick }) => {
                             <span>{securityUtils.sanitizeInput(user.email)}</span>
                           </div>
                         </div>
-                        
+
                         <div className={styles.dropdownSection}>
                           <h4>Your Account</h4>
-                          <button 
-                            onClick={handleProfileClick} 
+                          <button
+                            onClick={handleProfileClick}
                             className={styles.dropdownItem}
                             role="menuitem"
                           >
                             <FontAwesomeIcon icon={faUser} aria-hidden="true" />
                             Your Profile
                           </button>
-                          <button 
-                            onClick={handleOrdersClick} 
+                          <button
+                            onClick={handleOrdersClick}
                             className={styles.dropdownItem}
                             role="menuitem"
                           >
@@ -447,12 +434,12 @@ const Header = ({ onCartClick }) => {
                             Your Orders
                           </button>
                         </div>
-                        
+
                         {isAdmin && (
                           <div className={styles.dropdownSection}>
                             <h4>Admin</h4>
-                            <button 
-                              onClick={handleAdminClick} 
+                            <button
+                              onClick={handleAdminClick}
                               className={styles.dropdownItem}
                               role="menuitem"
                             >
@@ -461,10 +448,10 @@ const Header = ({ onCartClick }) => {
                             </button>
                           </div>
                         )}
-                        
+
                         <div className={styles.dropdownFooter}>
-                          <button 
-                            onClick={handleLogout} 
+                          <button
+                            onClick={handleLogout}
                             className={styles.logoutButton}
                             role="menuitem"
                           >
@@ -477,8 +464,8 @@ const Header = ({ onCartClick }) => {
                   </div>
                 ) : (
                   <div className={styles.authButtons}>
-                    <button 
-                      className={styles.signInBtn} 
+                    <button
+                      className={styles.signInBtn}
                       onClick={handleLogin}
                       aria-label="Sign in to your account"
                     >
@@ -490,8 +477,8 @@ const Header = ({ onCartClick }) => {
               </div>
 
               {/* Orders - Desktop */}
-              <div 
-                className={styles.orders} 
+              <div
+                className={styles.orders}
                 onClick={handleOrdersClick}
                 role="button"
                 tabIndex={0}
@@ -503,8 +490,8 @@ const Header = ({ onCartClick }) => {
               </div>
 
               {/* Cart */}
-              <div 
-                className={styles.cart} 
+              <div
+                className={styles.cart}
                 onClick={() => {
                   if (onCartClick) onCartClick();
                 }}
@@ -537,7 +524,7 @@ const Header = ({ onCartClick }) => {
             </div>
 
             {/* Mobile Search Trigger */}
-            <button 
+            <button
               className={styles.mobileSearchTrigger}
               onClick={focusSearch}
               aria-label="Search"

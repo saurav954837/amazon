@@ -8,8 +8,8 @@ import styles from '../../styles/Auth.module.css';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -41,18 +41,18 @@ const RegisterPage = () => {
   const validateForm = () => {
     const errors = {}
     
-    const sanitizedFirstName = sanitizeInput(formData.firstName)
+    const sanitizedFirstName = sanitizeInput(formData.first_name)
     if (!sanitizedFirstName) {
-      errors.firstName = 'First name is required'
+      errors.first_name = 'First name is required'
     } else if (sanitizedFirstName.length > 50) {
-      errors.firstName = 'First name is too long'
+      errors.first_name = 'First name is too long'
     }
     
-    const sanitizedLastName = sanitizeInput(formData.lastName)
+    const sanitizedLastName = sanitizeInput(formData.last_name)
     if (!sanitizedLastName) {
-      errors.lastName = 'Last name is required'
+      errors.last_name = 'Last name is required'
     } else if (sanitizedLastName.length > 50) {
-      errors.lastName = 'Last name is too long'
+      errors.last_name = 'Last name is too long'
     }
     
     const sanitizedEmail = sanitizeInput(formData.email)
@@ -113,21 +113,21 @@ const RegisterPage = () => {
     if (!validateForm()) return
     
     const userData = {
-      firstName: sanitizeInput(formData.firstName),
-      lastName: sanitizeInput(formData.lastName),
+      first_name: sanitizeInput(formData.first_name),
+      last_name: sanitizeInput(formData.last_name),
       email: sanitizeInput(formData.email),
       password: formData.password,
-      confirmPassword: formData.confirmPassword,
+      // Username will be generated from email in backend
     }
     
-    const result = await register(userData, csrfToken)
+    const result = await register(userData)
     
     if (result?.success) {
       localStorage.removeItem('rememberedEmail')
       sessionStorage.removeItem('rememberedEmail')
       navigate('/', { replace: true })
     } else {
-      setFormError(result?.message || 'Registration failed')
+      setFormError(result?.error || 'Registration failed')
     }
   }
 
@@ -160,59 +160,59 @@ const RegisterPage = () => {
             
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
-                <label htmlFor="firstName" className={styles.label}>
+                <label htmlFor="first_name" className={styles.label}>
                   First name
                 </label>
                 <div className={styles.inputWrapper}>
                   <FontAwesomeIcon icon={faUser} className={styles.inputIcon} aria-hidden="true" />
                   <input
                     ref={firstNameRef}
-                    id="firstName"
-                    name="firstName"
+                    id="first_name"
+                    name="first_name"
                     type="text"
                     autoComplete="given-name"
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={handleChange}
                     onKeyPress={handleKeyPress}
-                    className={`${styles.input} ${validationErrors.firstName ? styles.inputError : ''}`}
+                    className={`${styles.input} ${validationErrors.first_name ? styles.inputError : ''}`}
                     placeholder="Enter your first name"
                     disabled={loading}
                     aria-required="true"
-                    aria-invalid={!!validationErrors.firstName}
-                    aria-describedby={validationErrors.firstName ? 'firstname-error' : undefined}
+                    aria-invalid={!!validationErrors.first_name}
+                    aria-describedby={validationErrors.first_name ? 'firstname-error' : undefined}
                     maxLength="50"
                   />
                 </div>
-                {validationErrors.firstName && (
-                  <span id="firstname-error" className={styles.errorText} role="alert">{validationErrors.firstName}</span>
+                {validationErrors.first_name && (
+                  <span id="firstname-error" className={styles.errorText} role="alert">{validationErrors.first_name}</span>
                 )}
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="lastName" className={styles.label}>
+                <label htmlFor="last_name" className={styles.label}>
                   Last name
                 </label>
                 <div className={styles.inputWrapper}>
                   <FontAwesomeIcon icon={faUser} className={styles.inputIcon} aria-hidden="true" />
                   <input
-                    id="lastName"
-                    name="lastName"
+                    id="last_name"
+                    name="last_name"
                     type="text"
                     autoComplete="family-name"
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={handleChange}
                     onKeyPress={handleKeyPress}
-                    className={`${styles.input} ${validationErrors.lastName ? styles.inputError : ''}`}
+                    className={`${styles.input} ${validationErrors.last_name ? styles.inputError : ''}`}
                     placeholder="Enter your last name"
                     disabled={loading}
                     aria-required="true"
-                    aria-invalid={!!validationErrors.lastName}
-                    aria-describedby={validationErrors.lastName ? 'lastname-error' : undefined}
+                    aria-invalid={!!validationErrors.last_name}
+                    aria-describedby={validationErrors.last_name ? 'lastname-error' : undefined}
                     maxLength="50"
                   />
                 </div>
-                {validationErrors.lastName && (
-                  <span id="lastname-error" className={styles.errorText} role="alert">{validationErrors.lastName}</span>
+                {validationErrors.last_name && (
+                  <span id="lastname-error" className={styles.errorText} role="alert">{validationErrors.last_name}</span>
                 )}
               </div>
             </div>

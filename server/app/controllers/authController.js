@@ -6,7 +6,7 @@ export const authController = {
     register: async (req, res) => {
         try {
             const { username, first_name, last_name, email, password, role } = req.body;
-            
+            const finalUsername = username || email.split('@')[0];
             const existingUser = await User.readByEmail(email);
             if (existingUser) {
                 return res.status(400).json({
@@ -14,7 +14,7 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             const existingUsername = await User.readByUsername(username);
             if (existingUsername) {
                 return res.status(400).json({
@@ -22,31 +22,31 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             const saltRounds = 10;
             const password_hash = await bcrypt.hash(password, saltRounds);
-            
+
             const userData = {
-                username,
+                username: finalUsername,
                 first_name,
                 last_name,
                 email,
                 password_hash,
                 role: role || 'user'
             };
-            
+
             const userId = await User.create(userData);
-            
+
             const user = await User.readById(userId);
             const tokens = generateTokens(user);
-            
+
             res.cookie('refreshToken', tokens.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
-            
+
             res.status(201).json({
                 message: "User registered successfully",
                 success: true,
@@ -59,7 +59,8 @@ export const authController = {
                         email: user.email,
                         role: user.role
                     },
-                    accessToken: tokens.accessToken
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken
                 }
             });
         } catch (error) {
@@ -74,7 +75,7 @@ export const authController = {
     login: async (req, res) => {
         try {
             const { email, password } = req.body;
-            
+
             const user = await User.readByEmail(email);
             if (!user) {
                 return res.status(401).json({
@@ -82,7 +83,7 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             const validPassword = await bcrypt.compare(password, user.password_hash);
             if (!validPassword) {
                 return res.status(401).json({
@@ -90,18 +91,18 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             await User.updateLastLogin(user.user_id);
-            
+
             const tokens = generateTokens(user);
-            
+
             res.cookie('refreshToken', tokens.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
-            
+
             res.json({
                 message: "Login successful",
                 success: true,
@@ -114,13 +115,48 @@ export const authController = {
                         email: user.email,
                         role: user.role
                     },
-                    accessToken: tokens.accessToken
+                    accessToken: tokens.accessToken,
+                    refreshToken: tokens.refreshToken
                 }
             });
         } catch (error) {
             console.error(`Login error: ${error.message}`);
             res.status(500).json({
                 message: "Failed to login",
+                success: false
+            });
+        }
+    },
+
+    verify: async (req, res) => {
+        try {
+            const user = await User.readById(req.user.user_id);
+
+            if (!user) {
+                return res.status(404).json({
+                    message: "User not found",
+                    success: false
+                });
+            }
+
+            res.json({
+                message: "Token verified successfully",
+                success: true,
+                data: {
+                    user: {
+                        user_id: user.user_id,
+                        username: user.username,
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        email: user.email,
+                        role: user.role
+                    }
+                }
+            });
+        } catch (error) {
+            console.error(`Verify error: ${error.message}`);
+            res.status(500).json({
+                message: "Failed to verify token",
                 success: false
             });
         }
@@ -145,25 +181,25 @@ export const authController = {
     refreshToken: async (req, res) => {
         try {
             const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
-            
+
             if (!refreshToken) {
                 return res.status(400).json({
                     message: "Refresh token required",
                     success: false
                 });
             }
-            
+
             const { verifyRefreshToken, generateAccessToken } = await import("../utils/jwt.js");
-            
+
             const decoded = verifyRefreshToken(refreshToken);
-            
+
             if (decoded.token_type !== 'refresh') {
                 return res.status(403).json({
                     message: "Invalid token type",
                     success: false
                 });
             }
-            
+
             const user = await User.readById(decoded.user_id);
             if (!user) {
                 return res.status(404).json({
@@ -171,9 +207,9 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             const newAccessToken = generateAccessToken(user);
-            
+
             res.json({
                 message: "Token refreshed successfully",
                 success: true,
@@ -188,7 +224,7 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             res.status(403).json({
                 message: "Invalid refresh token",
                 success: false
@@ -199,14 +235,14 @@ export const authController = {
     profile: async (req, res) => {
         try {
             const user = await User.readById(req.user.user_id);
-            
+
             if (!user) {
                 return res.status(404).json({
                     message: "User not found",
                     success: false
                 });
             }
-            
+
             res.json({
                 message: "Profile retrieved successfully",
                 success: true,
@@ -235,7 +271,7 @@ export const authController = {
     updateProfile: async (req, res) => {
         try {
             const updates = {};
-            
+
             if (req.body.username !== undefined) {
                 updates.username = req.body.username;
             }
@@ -248,18 +284,18 @@ export const authController = {
             if (req.body.email !== undefined) {
                 updates.email = req.body.email;
             }
-            
+
             const affectedRows = await User.update(req.user.user_id, updates);
-            
+
             if (affectedRows === 0) {
                 return res.status(404).json({
                     message: "User not found",
                     success: false
                 });
             }
-            
+
             const updatedUser = await User.readById(req.user.user_id);
-            
+
             res.json({
                 message: "Profile updated successfully",
                 success: true,
@@ -286,9 +322,9 @@ export const authController = {
     changePassword: async (req, res) => {
         try {
             const { current_password, new_password } = req.body;
-            
+
             const user = await User.readById(req.user.user_id);
-            
+
             const validPassword = await bcrypt.compare(current_password, user.password_hash);
             if (!validPassword) {
                 return res.status(400).json({
@@ -296,19 +332,19 @@ export const authController = {
                     success: false
                 });
             }
-            
+
             const saltRounds = 10;
             const new_password_hash = await bcrypt.hash(new_password, saltRounds);
-            
+
             const affectedRows = await User.update(req.user.user_id, { password_hash: new_password_hash });
-            
+
             if (affectedRows === 0) {
                 return res.status(404).json({
                     message: "User not found",
                     success: false
                 });
             }
-            
+
             res.json({
                 message: "Password changed successfully",
                 success: true

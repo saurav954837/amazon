@@ -6,20 +6,25 @@ import {
   RouterProvider,
   Outlet
 } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import MainLayout from './app/layout/MainLayout.jsx';
 import Loader from './app/ui/Loader.jsx';
 import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
 import { AuthProvider } from './app/hooks/authHook.js';
-import { ProductProvider } from './app/context/ProductContext.jsx'
-import RequireAuth from './app/components/auth/RequireAuth.jsx';
-import RequireGuest from './app/components/auth/RequireGuest.jsx'
+import { ProductProvider } from './app/context/ProductContext.jsx';
+import AuthLayout from './app/layout/AuthLayout.jsx';
+import AdminRoute from './app/routes/AdminRoute.jsx';
+import GuestRoute from './app/routes/GuestRoute.jsx';
 
 // Lazy load components with preloading
-const Homepage = lazy(() => import('./app/components/HomePage.jsx'))
-const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'))
-const NotFound = lazy(() => import('./app/components/NotFound.jsx'))
-const LoginPage = lazy(() => import('./app/components/auth/LoginPage.jsx'))
-const RegisterPage = lazy(() => import('./app/components/auth/RegisterPage.jsx'))
+const Homepage = lazy(() => import('./app/components/HomePage.jsx'));
+const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'));
+const NotFound = lazy(() => import('./app/components/NotFound.jsx'));
+const LoginPage = lazy(() => import('./app/components/auth/LoginPage.jsx'));
+const RegisterPage = lazy(() => import('./app/components/auth/RegisterPage.jsx'));
+const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.jsx'));
+const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
+const UnauthorizedPage = lazy(() => import('./app/components/UnauthorizedPage.jsx'));
 
 // Data loaders
 import { productLoader, homepageLoader, searchLoader } from './app/utils/dataLoader.js';
@@ -34,31 +39,37 @@ const preloadRoutes = () => {
     import('./app/components/HomePage.jsx'),
     import('./app/components/ProductPage.jsx'),
     import('./app/components/auth/LoginPage.jsx'),
-    import('./app/components/auth/RegisterPage.jsx')
+    import('./app/components/auth/RegisterPage.jsx'),
+    import('./app/components/guard/UserDashboard.jsx'),
+    import('./app/components/guard/AdminDashboard.jsx')
   ];
 
   Promise.allSettled(preloadPromises).catch(() => {
     // Silent fail for preloading
-  })
-}
+  });
+};
 
 // Initialize preloading on app start
 if (typeof window !== 'undefined') {
   window.addEventListener('load', preloadRoutes);
   document.addEventListener('mouseover', (e) => {
-    const link = e.target.closest('a[href^="/"]')
+    const link = e.target.closest('a[href^="/"]');
     if (link) {
-      const href = link.getAttribute('href')
+      const href = link.getAttribute('href');
       if (href === '/products') {
-        import('./app/components/ProductPage.jsx')
+        import('./app/components/ProductPage.jsx');
       } else if (href === '/login') {
-        import('./app/components/auth/LoginPage.jsx')
+        import('./app/components/auth/LoginPage.jsx');
       } else if (href === '/register') {
-        import('./app/components/auth/RegisterPage.jsx')
+        import('./app/components/auth/RegisterPage.jsx');
+      } else if (href === '/dashboard') {
+        import('./app/components/guard/UserDashboard.jsx');
+      } else if (href === '/admin-dashboard') {
+        import('./app/components/guard/AdminDashboard.jsx');
       }
     }
-  }, { passive: true })
-};
+  }, { passive: true });
+}
 
 // Route configuration with nested routes
 const router = createBrowserRouter(
@@ -75,7 +86,7 @@ const router = createBrowserRouter(
       errorElement={<RouteError />}
       loader={homepageLoader}
       shouldRevalidate={({ currentUrl, nextUrl }) => {
-        return currentUrl.pathname !== nextUrl.pathname
+        return currentUrl.pathname !== nextUrl.pathname;
       }}
     >
       {/* Public Homepage */}
@@ -89,26 +100,123 @@ const router = createBrowserRouter(
         errorElement={<NetworkError />}
       />
 
-      {/* Auth Routes - Public */}
-      <Route
-        path="login"
-        element={
-          <RequireGuest>
+      {/* Guest Only Routes */}
+      <Route element={<GuestRoute />}>
+        <Route
+          path="login"
+          element={
             <Suspense fallback={<Loader />}>
               <LoginPage />
             </Suspense>
-          </RequireGuest>
-        }
-      />
+          }
+        />
 
-      <Route
-        path="register"
-        element={
-          <RequireGuest>
+        <Route
+          path="register"
+          element={
             <Suspense fallback={<Loader />}>
               <RegisterPage />
             </Suspense>
-          </RequireGuest>
+          }
+        />
+      </Route>
+
+      {/* Authenticated User Routes */}
+      <Route element={<AuthLayout />}>
+        <Route
+          path="dashboard"
+          element={
+            <Suspense fallback={<Loader />}>
+              <UserDashboard />
+            </Suspense>
+          }
+        />
+        
+        {/* Add more user routes here */}
+        <Route
+          path="profile"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>User Profile Page</div>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="orders"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>User Orders Page</div>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="cart"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>Shopping Cart Page</div>
+            </Suspense>
+          }
+        />
+      </Route>
+
+      {/* Admin Only Routes */}
+      <Route element={<AdminRoute />}>
+        <Route
+          path="admin-dashboard"
+          element={
+            <Suspense fallback={<Loader />}>
+              <AdminDashboard />
+            </Suspense>
+          }
+        />
+        
+        {/* Add more admin routes here */}
+        <Route
+          path="admin/users"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>User Management Page</div>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="admin/products"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>Product Management Page</div>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="admin/orders"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>Order Management Page</div>
+            </Suspense>
+          }
+        />
+        
+        <Route
+          path="admin/settings"
+          element={
+            <Suspense fallback={<Loader />}>
+              <div>Admin Settings Page</div>
+            </Suspense>
+          }
+        />
+      </Route>
+
+      {/* Unauthorized Page */}
+      <Route
+        path="unauthorized"
+        element={
+          <Suspense fallback={<Loader />}>
+            <UnauthorizedPage />
+          </Suspense>
         }
       />
 
@@ -128,7 +236,11 @@ const router = createBrowserRouter(
         />
         <Route
           path=":product_id"
-          element={<ProductPage />}
+          element={
+            <Suspense fallback={<Loader />}>
+              <ProductPage />
+            </Suspense>
+          }
           loader={productLoader}
           errorElement={<RouteError />}
           shouldRevalidate={({ currentParams, nextParams }) => {
@@ -157,48 +269,22 @@ const router = createBrowserRouter(
           </Suspense>
         }
         loader={({ request }) => {
-          const url = new URL(request.url)
-          const query = url.searchParams.get('q')
-          return searchLoader(query)
+          const url = new URL(request.url);
+          const query = url.searchParams.get('q');
+          return searchLoader(query);
         }}
       />
 
-      {/* Deals & Specials */}
+      {/* Redirects */}
       <Route
-        path="deals"
-        element={
-          <Suspense fallback={<Loader />}>
-            <Homepage />
-          </Suspense>
-        }
-        loader={() => searchLoader('deals')}
+        path="admin"
+        element={<Navigate to="/admin-dashboard" replace />}
       />
 
       <Route
-        path="bestsellers"
-        element={
-          <Suspense fallback={<Loader />}>
-            <Homepage />
-          </Suspense>
-        }
-        loader={() => searchLoader('bestsellers')}
+        path="user"
+        element={<Navigate to="/dashboard" replace />}
       />
-
-      <Route
-        path="new"
-        element={
-          <Suspense fallback={<Loader />}>
-            <Homepage />
-          </Suspense>
-        }
-        loader={() => searchLoader('new')}
-      />
-
-      {/* Protected User Routes */}
-
-      {/* Protected Admin Routes */}
-
-      {/* Static Pages */}
 
       {/* Catch-all 404 route */}
       <Route
@@ -224,7 +310,7 @@ const router = createBrowserRouter(
 );
 
 const App = () => {
-  const MemoizedRouterProvider = React.memo(RouterProvider)
+  const MemoizedRouterProvider = React.memo(RouterProvider);
 
   return (
     <ErrorBoundary>
@@ -239,7 +325,7 @@ const App = () => {
         />
       </React.StrictMode>
     </ErrorBoundary>
-  )
-}
+  );
+};
 
 export default React.memo(App);
