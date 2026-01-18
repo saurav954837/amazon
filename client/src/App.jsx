@@ -1,22 +1,28 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
-  Outlet
+  Outlet,
+  Navigate
 } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+
+// Layout Components
 import MainLayout from './app/layout/MainLayout.jsx';
-import Loader from './app/ui/Loader.jsx';
-import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
-import { AuthProvider } from './app/hooks/authHook.js';
-import { ProductProvider } from './app/context/ProductContext.jsx';
 import AuthLayout from './app/layout/AuthLayout.jsx';
 import AdminRoute from './app/routes/AdminRoute.jsx';
 import GuestRoute from './app/routes/GuestRoute.jsx';
 
-// Lazy load components with preloading
+// Context Providers
+import { AuthProvider } from './app/hooks/authHook.js';
+import { ProductProvider } from './app/context/ProductContext.jsx';
+
+// UI Components
+import Loader from './app/ui/Loader.jsx';
+import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
+
+// Lazy loaded components
 const Homepage = lazy(() => import('./app/components/HomePage.jsx'));
 const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'));
 const NotFound = lazy(() => import('./app/components/NotFound.jsx'));
@@ -26,52 +32,10 @@ const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.js
 const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
 const UnauthorizedPage = lazy(() => import('./app/components/UnauthorizedPage.jsx'));
 
-// Data loaders
+// Data loaders for route preloading
 import { productLoader, homepageLoader, searchLoader } from './app/utils/dataLoader.js';
 
-// Error components
-import RouteError from './app/ui/RouterError.jsx';
-import NetworkError from './app/ui/NetworkError.jsx';
-
-// Performance optimization: Preload critical routes
-const preloadRoutes = () => {
-  const preloadPromises = [
-    import('./app/components/HomePage.jsx'),
-    import('./app/components/ProductPage.jsx'),
-    import('./app/components/auth/LoginPage.jsx'),
-    import('./app/components/auth/RegisterPage.jsx'),
-    import('./app/components/guard/UserDashboard.jsx'),
-    import('./app/components/guard/AdminDashboard.jsx')
-  ];
-
-  Promise.allSettled(preloadPromises).catch(() => {
-    // Silent fail for preloading
-  });
-};
-
-// Initialize preloading on app start
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', preloadRoutes);
-  document.addEventListener('mouseover', (e) => {
-    const link = e.target.closest('a[href^="/"]');
-    if (link) {
-      const href = link.getAttribute('href');
-      if (href === '/products') {
-        import('./app/components/ProductPage.jsx');
-      } else if (href === '/login') {
-        import('./app/components/auth/LoginPage.jsx');
-      } else if (href === '/register') {
-        import('./app/components/auth/RegisterPage.jsx');
-      } else if (href === '/dashboard') {
-        import('./app/components/guard/UserDashboard.jsx');
-      } else if (href === '/admin-dashboard') {
-        import('./app/components/guard/AdminDashboard.jsx');
-      }
-    }
-  }, { passive: true });
-}
-
-// Route configuration with nested routes
+// Create router outside component to prevent recreation on re-renders
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
@@ -83,13 +47,10 @@ const router = createBrowserRouter(
           </ProductProvider>
         </AuthProvider>
       }
-      errorElement={<RouteError />}
+      errorElement={<div className="error-page">Something went wrong</div>}
       loader={homepageLoader}
-      shouldRevalidate={({ currentUrl, nextUrl }) => {
-        return currentUrl.pathname !== nextUrl.pathname;
-      }}
     >
-      {/* Public Homepage */}
+      {/* Public Routes */}
       <Route
         index
         element={
@@ -97,10 +58,9 @@ const router = createBrowserRouter(
             <Homepage />
           </Suspense>
         }
-        errorElement={<NetworkError />}
       />
 
-      {/* Guest Only Routes */}
+      {/* Guest Only Routes - Login/Register */}
       <Route element={<GuestRoute />}>
         <Route
           path="login"
@@ -110,7 +70,6 @@ const router = createBrowserRouter(
             </Suspense>
           }
         />
-
         <Route
           path="register"
           element={
@@ -121,7 +80,7 @@ const router = createBrowserRouter(
         />
       </Route>
 
-      {/* Authenticated User Routes */}
+      {/* Protected User Routes - Need Authentication */}
       <Route element={<AuthLayout />}>
         <Route
           path="dashboard"
@@ -131,37 +90,33 @@ const router = createBrowserRouter(
             </Suspense>
           }
         />
-        
-        {/* Add more user routes here */}
         <Route
           path="profile"
           element={
             <Suspense fallback={<Loader />}>
-              <div>User Profile Page</div>
+              <div>User Profile</div>
             </Suspense>
           }
         />
-        
         <Route
           path="orders"
           element={
             <Suspense fallback={<Loader />}>
-              <div>User Orders Page</div>
+              <div>Orders</div>
             </Suspense>
           }
         />
-        
         <Route
           path="cart"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Shopping Cart Page</div>
+              <div>Cart</div>
             </Suspense>
           }
         />
       </Route>
 
-      {/* Admin Only Routes */}
+      {/* Admin Only Routes - Need Admin Role */}
       <Route element={<AdminRoute />}>
         <Route
           path="admin-dashboard"
@@ -171,46 +126,33 @@ const router = createBrowserRouter(
             </Suspense>
           }
         />
-        
-        {/* Add more admin routes here */}
         <Route
           path="admin/users"
           element={
             <Suspense fallback={<Loader />}>
-              <div>User Management Page</div>
+              <div>User Management</div>
             </Suspense>
           }
         />
-        
         <Route
           path="admin/products"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Product Management Page</div>
+              <div>Product Management</div>
             </Suspense>
           }
         />
-        
         <Route
           path="admin/orders"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Order Management Page</div>
-            </Suspense>
-          }
-        />
-        
-        <Route
-          path="admin/settings"
-          element={
-            <Suspense fallback={<Loader />}>
-              <div>Admin Settings Page</div>
+              <div>Order Management</div>
             </Suspense>
           }
         />
       </Route>
 
-      {/* Unauthorized Page */}
+      {/* Error and Info Pages */}
       <Route
         path="unauthorized"
         element={
@@ -242,10 +184,6 @@ const router = createBrowserRouter(
             </Suspense>
           }
           loader={productLoader}
-          errorElement={<RouteError />}
-          shouldRevalidate={({ currentParams, nextParams }) => {
-            return currentParams.product_id !== nextParams.product_id;
-          }}
         />
       </Route>
 
@@ -275,18 +213,17 @@ const router = createBrowserRouter(
         }}
       />
 
-      {/* Redirects */}
+      {/* Dashboard Redirects */}
       <Route
         path="admin"
         element={<Navigate to="/admin-dashboard" replace />}
       />
-
       <Route
         path="user"
         element={<Navigate to="/dashboard" replace />}
       />
 
-      {/* Catch-all 404 route */}
+      {/* 404 Page */}
       <Route
         path="*"
         element={
@@ -298,28 +235,57 @@ const router = createBrowserRouter(
     </Route>
   ),
   {
-    basename: process.env.NODE_ENV === 'production' ? '/amazon' : '/',
+    basename: '/',
     future: {
       v7_normalizeFormMethod: true,
-      v7_fetcherPersist: true,
-      v7_partialHydration: true,
-      v7_relativeSplatPath: true,
     },
-    window: typeof window !== 'undefined' ? window : undefined,
   }
 );
 
 const App = () => {
-  const MemoizedRouterProvider = React.memo(RouterProvider);
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('tempData');
+      sessionStorage.clear();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
+  useEffect(() => {
+    const preloadOnHover = (e) => {
+      const link = e.target.closest('a');
+      if (link) {
+        const href = link.getAttribute('href');
+        if (href === '/products') {
+          import('./app/components/ProductPage.jsx');
+        } else if (href === '/dashboard') {
+          import('./app/components/guard/UserDashboard.jsx');
+        } else if (href === '/admin-dashboard') {
+          import('./app/components/guard/AdminDashboard.jsx');
+        }
+      }
+    };
+
+    document.addEventListener('mouseover', preloadOnHover);
+    return () => document.removeEventListener('mouseover', preloadOnHover);
+  }, []);
 
   return (
     <ErrorBoundary>
       <React.StrictMode>
-        <MemoizedRouterProvider
+        <RouterProvider
           router={router}
           fallbackElement={
-            <div className="app-loading">
-              <Loader size="large" message="Loading Amazon Experience..." />
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100vh',
+              background: '#f3f4f6'
+            }}>
+              <Loader size="large" message="Loading..." />
             </div>
           }
         />
@@ -327,5 +293,4 @@ const App = () => {
     </ErrorBoundary>
   );
 };
-
 export default React.memo(App);
