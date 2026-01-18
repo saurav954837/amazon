@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowUp, faGlobe } from '@fortawesome/free-solid-svg-icons'
-import styles from '../styles/Footer.module.css'
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowUp, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import styles from '../styles/Footer.module.css';
+import amazon_logo from "../../assets/amazon-header.png";
 
 const Footer = () => {
   const scrollToTop = () => {
@@ -17,7 +18,6 @@ const Footer = () => {
       
       <div className={styles.footerContent}>
         <div className={styles.container}>
-          {/* Main Footer Links */}
           <div className={styles.footerGrid}>
             <div className={styles.footerColumn}>
               <h3 className={styles.columnTitle}>Get to Know Us</h3>
@@ -60,21 +60,14 @@ const Footer = () => {
             </div>
           </div>
           
-          {/* Footer Bottom */}
           <div className={styles.footerBottom}>
             <div className={styles.logoSection}>
               <div className={styles.logo}>
-                <span className={styles.logoText}>amazon</span>
-                <span className={styles.domain}>.eg</span>
+                <img src={amazon_logo} alt='Amazon Logo' width={150} />
               </div>
             </div>
             
             <div className={styles.footerOptions}>
-              <div className={styles.languageSelector}>
-                <FontAwesomeIcon icon={faGlobe} />
-                <span>English</span>
-              </div>
-              
               <div className={styles.currencySelector}>
                 <span>EGP - Egyptian Pound</span>
               </div>
@@ -87,7 +80,7 @@ const Footer = () => {
           
           {/* Copyright */}
           <div className={styles.copyright}>
-            <p>&copy; 1996-2024, Amazon.com, Inc. or its affiliates</p>
+            <p>&copy; {new Date().getFullYear()}, Amazon.com, Inc. or its affiliates</p>
             <div className={styles.legalLinks}>
               <Link to="/conditions">Conditions of Use</Link>
               <Link to="/privacy">Privacy Notice</Link>

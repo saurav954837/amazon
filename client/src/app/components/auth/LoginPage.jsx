@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/authHook.js';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEnvelope, faLock, faEye, faEyeSlash, faAmazon } from '@fortawesome/free-solid-svg-icons'
-import styles from '../../styles/LoginPage.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope, faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faAmazon } from '@fortawesome/free-brands-svg-icons';
+import styles from '../../styles/Auth.module.css';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('')
@@ -12,15 +13,19 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false)
   const [validationErrors, setValidationErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
+  const [csrfToken] = useState(() => Math.random().toString(36).substr(2))
   
+  const formRef = useRef(null)
+  const emailRef = useRef(null)
   const { login, error, clearError } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   
   const from = location.state?.from?.pathname || '/'
 
-  // Load remembered email
   useEffect(() => {
+    emailRef.current?.focus()
     const rememberedEmail = localStorage.getItem('rememberedEmail')
     if (rememberedEmail) {
       setEmail(rememberedEmail)
@@ -28,19 +33,32 @@ const LoginPage = () => {
     }
   }, [])
 
+  useEffect(() => {
+    if (error) setFormError(error)
+  }, [error])
+
+  const sanitizeInput = (input) => {
+    return input.trim().replace(/[<>]/g, '')
+  }
+
   const validateForm = () => {
     const errors = {}
     
-    if (!email.trim()) {
+    const sanitizedEmail = sanitizeInput(email)
+    if (!sanitizedEmail) {
       errors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Email is invalid'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
+      errors.email = 'Valid email is required'
+    } else if (sanitizedEmail.length > 254) {
+      errors.email = 'Email is too long'
     }
     
     if (!password) {
       errors.password = 'Password is required'
-    } else if (password.length < 6) {
-      errors.password = 'Password must be at least 6 characters'
+    } else if (password.length < 8) {
+      errors.password = 'Password must be at least 8 characters'
+    } else if (password.length > 128) {
+      errors.password = 'Password is too long'
     }
     
     setValidationErrors(errors)
@@ -49,153 +67,165 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    e.stopPropagation()
+    
     clearError()
+    setFormError('')
     
     if (!validateForm()) return
     
     setIsSubmitting(true)
     
     try {
-      const result = await login(email, password)
+      const sanitizedEmail = sanitizeInput(email)
+      const result = await login(sanitizedEmail, password, csrfToken)
       
-      if (result.success) {
+      if (result?.success) {
         if (rememberMe) {
-          localStorage.setItem('rememberedEmail', email)
+          localStorage.setItem('rememberedEmail', sanitizedEmail)
         } else {
           localStorage.removeItem('rememberedEmail')
         }
+        sessionStorage.removeItem('rememberedEmail')
         
         navigate(from, { replace: true })
+      } else {
+        setFormError(result?.message || 'Login failed')
       }
     } catch (err) {
+      setFormError('Network error. Please try again.')
       console.error('Login error:', err)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleDemoLogin = async (role = 'user') => {
-    const demoCredentials = {
-      user: { email: 'user@demo.com', password: 'demo123' },
-      admin: { email: 'admin@demo.com', password: 'admin123' }
-    }
-    
-    const creds = demoCredentials[role]
-    setEmail(creds.email)
-    setPassword(creds.password)
-    
-    const result = await login(creds.email, creds.password)
-    
-    if (result.success) {
-      navigate(from, { replace: true })
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !isSubmitting) {
+      handleSubmit(e)
     }
   }
 
   return (
-    <div className={styles.loginPage}>
+    <div className="bg-light">
       <div className={styles.loginContainer}>
         <div className={styles.loginHeader}>
-          <Link to="/" className={styles.logo}>
-            <FontAwesomeIcon icon={faAmazon} className={styles.logoIcon} />
-            <span className={styles.logoText}>amazon</span>
-            <span className={styles.domain}>.eg</span>
+          <Link to="/" className={styles.logo} aria-label="Amazon Home">
+            <FontAwesomeIcon icon={faAmazon} className={styles.logoIcon} aria-hidden="true" />
           </Link>
-          <h1 className={styles.title}>Sign in</h1>
+          <h1 className="text-dark">Sign in</h1>
         </div>
 
         <div className={styles.loginCard}>
-          {error && (
-            <div className={styles.errorAlert}>
-              <div className={styles.errorIcon}>!</div>
-              <p>{error}</p>
+          {(formError || error) && (
+            <div className={styles.errorAlert} role="alert" aria-live="assertive">
+              <div className={styles.errorIcon} aria-hidden="true">!</div>
+              <p>{formError || error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className={styles.loginForm}>
+          <form 
+            ref={formRef}
+            onSubmit={handleSubmit} 
+            className={styles.loginForm}
+            noValidate
+            aria-label="Sign in form"
+          >
+            <input type="hidden" name="csrf_token" value={csrfToken} />
+            
             <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>
                 Email or mobile phone number
               </label>
               <div className={styles.inputWrapper}>
-                <FontAwesomeIcon icon={faEnvelope} className={styles.inputIcon} />
+                <FontAwesomeIcon icon={faEnvelope} className={styles.inputIcon} aria-hidden="true" />
                 <input
+                  ref={emailRef}
                   id="email"
+                  name="email"
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => {
+                  onChange={(e) => {
+                    setEmail(e.target.value)
                     if (validationErrors.email) {
                       setValidationErrors(prev => ({ ...prev, email: '' }))
                     }
                   }}
+                  onKeyPress={handleKeyPress}
                   className={`${styles.input} ${validationErrors.email ? styles.inputError : ''}`}
                   placeholder="Enter your email"
                   disabled={isSubmitting}
-                  autoComplete="email"
+                  aria-required="true"
+                  aria-invalid={!!validationErrors.email}
+                  aria-describedby={validationErrors.email ? 'email-error' : undefined}
+                  maxLength="254"
                 />
               </div>
               {validationErrors.email && (
-                <span className={styles.errorText}>{validationErrors.email}</span>
+                <span id="email-error" className={styles.errorText} role="alert">{validationErrors.email}</span>
               )}
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="password" className={styles.label}>
-                Password
-              </label>
+              <div className={styles.passwordHeader}>
+                <label htmlFor="password" className={styles.label}>
+                  Password
+                </label>
+                <Link to="/forgot-password" className={styles.forgotPassword} tabIndex={isSubmitting ? -1 : 0}>
+                  Forgot password?
+                </Link>
+              </div>
               <div className={styles.inputWrapper}>
-                <FontAwesomeIcon icon={faLock} className={styles.inputIcon} />
+                <FontAwesomeIcon icon={faLock} className={styles.inputIcon} aria-hidden="true" />
                 <input
                   id="password"
+                  name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => {
+                  onChange={(e) => {
+                    setPassword(e.target.value)
                     if (validationErrors.password) {
                       setValidationErrors(prev => ({ ...prev, password: '' }))
                     }
                   }}
+                  onKeyPress={handleKeyPress}
                   className={`${styles.input} ${validationErrors.password ? styles.inputError : ''}`}
                   placeholder="Enter your password"
                   disabled={isSubmitting}
-                  autoComplete="current-password"
+                  aria-required="true"
+                  aria-invalid={!!validationErrors.password}
+                  aria-describedby={validationErrors.password ? 'password-error' : undefined}
+                  maxLength="128"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className={styles.passwordToggle}
                   disabled={isSubmitting}
-                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-controls="password"
+                  tabIndex={isSubmitting ? -1 : 0}
                 >
-                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} aria-hidden="true" />
                 </button>
               </div>
               {validationErrors.password && (
-                <span className={styles.errorText}>{validationErrors.password}</span>
+                <span id="password-error" className={styles.errorText} role="alert">{validationErrors.password}</span>
               )}
-            </div>
-
-            <div className={styles.rememberMe}>
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className={styles.checkbox}
-                  disabled={isSubmitting}
-                />
-                <span className={styles.checkboxText}>Remember me</span>
-              </label>
             </div>
 
             <button
               type="submit"
               className={styles.submitButton}
               disabled={isSubmitting}
+              aria-busy={isSubmitting}
             >
               {isSubmitting ? (
                 <span className={styles.submittingText}>
-                  <span className={styles.spinner}></span>
+                  <span className={styles.spinner} aria-hidden="true"></span>
                   Signing in...
                 </span>
               ) : (
@@ -211,51 +241,20 @@ const LoginPage = () => {
               to="/register"
               className={styles.createAccountButton}
               state={{ from }}
+              tabIndex={isSubmitting ? -1 : 0}
             >
               Create your Amazon account
             </Link>
           </form>
 
-          <div className={styles.demoSection}>
-            <p className={styles.demoTitle}>Try demo accounts:</p>
-            <div className={styles.demoButtons}>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('user')}
-                className={styles.demoButton}
-                disabled={isSubmitting}
-              >
-                Demo User
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin('admin')}
-                className={styles.demoButtonAdmin}
-                disabled={isSubmitting}
-              >
-                Demo Admin
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.helpLinks}>
-            <Link to="/forgot-password" className={styles.helpLink}>
-              Forgot your password?
-            </Link>
-            <span className={styles.dividerDot}>•</span>
-            <Link to="/help" className={styles.helpLink}>
-              Need help?
-            </Link>
-          </div>
-
           <div className={styles.terms}>
             <p className={styles.termsText}>
               By continuing, you agree to Amazon's{' '}
-              <Link to="/conditions" className={styles.termsLink}>
+              <Link className={styles.termsLink} tabIndex={isSubmitting ? -1 : 0}>
                 Conditions of Use
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className={styles.termsLink}>
+              <Link className={styles.termsLink} tabIndex={isSubmitting ? -1 : 0}>
                 Privacy Notice
               </Link>
               .
@@ -264,24 +263,13 @@ const LoginPage = () => {
         </div>
 
         <div className={styles.footer}>
-          <div className={styles.footerLinks}>
-            <Link to="/conditions" className={styles.footerLink}>
-              Conditions of Use
-            </Link>
-            <Link to="/privacy" className={styles.footerLink}>
-              Privacy Notice
-            </Link>
-            <Link to="/help" className={styles.footerLink}>
-              Help
-            </Link>
-          </div>
           <p className={styles.copyright}>
-            © 1996-2026, Amazon.com, Inc. or its affiliates
+            © 1996-{new Date().getFullYear()}, Amazon.com, Inc. or its affiliates
           </p>
         </div>
       </div>
     </div>
   )
-}
+};
 
 export default LoginPage;

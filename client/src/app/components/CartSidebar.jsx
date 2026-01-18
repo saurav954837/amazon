@@ -1,15 +1,11 @@
-import { useState } from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faTimes, faTrash, faShoppingCart } from '@fortawesome/free-solid-svg-icons'
-import { useNavigate } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTimes, faTrash, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import { useProduct } from '../context/ProductContext.jsx';
 import styles from '../styles/CartSidebar.module.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Wireless Headphones', price: 299.99, quantity: 1, image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=200&q=80' },
-    { id: 2, name: 'Smart Watch', price: 199.99, quantity: 2, image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=200&q=80' },
-    { id: 3, name: 'Laptop Stand', price: 49.99, quantity: 1, image: 'https://images.unsplash.com/photo-1545235617-9465d2a55698?auto=format&fit=crop&w=200&q=80' }
-  ])
+  const { cart, removeFromCart, updateCartQuantity } = useProduct()
   const navigate = useNavigate()
 
   const formatPrice = (price) => {
@@ -20,21 +16,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
   }
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
-
-  const updateQuantity = (id, delta) => {
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
-    )
-  }
-
-  const removeItem = (id) => {
-    setCartItems(items => items.filter(item => item.id !== id))
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
   }
 
   const handleCheckout = () => {
@@ -50,7 +32,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
         <div className={styles.cartHeader}>
           <h2 className={styles.cartTitle}>
             <FontAwesomeIcon icon={faShoppingCart} />
-            Shopping Cart
+            Shopping Cart ({cart.length})
           </h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} />
@@ -58,7 +40,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
         </div>
 
         <div className={styles.cartContent}>
-          {cartItems.length === 0 ? (
+          {cart.length === 0 ? (
             <div className={styles.emptyCart}>
               <FontAwesomeIcon icon={faShoppingCart} className={styles.emptyIcon} />
               <p>Your cart is empty</p>
@@ -69,8 +51,8 @@ const CartSidebar = ({ isOpen, onClose }) => {
           ) : (
             <>
               <div className={styles.cartItems}>
-                {cartItems.map(item => (
-                  <div key={item.id} className={styles.cartItem}>
+                {cart.map(item => (
+                  <div key={item.product_id} className={styles.cartItem}>
                     <img src={item.image} alt={item.name} className={styles.itemImage} />
                     <div className={styles.itemInfo}>
                       <h3 className={styles.itemName}>{item.name}</h3>
@@ -78,21 +60,21 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <div className={styles.itemActions}>
                         <div className={styles.quantityControls}>
                           <button 
-                            onClick={() => updateQuantity(item.id, -1)}
+                            onClick={() => updateCartQuantity(item.product_id, item.quantity - 1)}
                             className={styles.quantityBtn}
                           >
                             -
                           </button>
                           <span className={styles.quantity}>{item.quantity}</span>
                           <button 
-                            onClick={() => updateQuantity(item.id, 1)}
+                            onClick={() => updateCartQuantity(item.product_id, item.quantity + 1)}
                             className={styles.quantityBtn}
                           >
                             +
                           </button>
                         </div>
                         <button 
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeFromCart(item.product_id)}
                           className={styles.removeBtn}
                         >
                           <FontAwesomeIcon icon={faTrash} />

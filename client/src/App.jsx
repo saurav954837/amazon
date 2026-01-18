@@ -1,20 +1,21 @@
-import React, { Suspense, lazy } from 'react'
-import { 
+import React, { Suspense, lazy } from 'react';
+import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
   RouterProvider,
   Outlet
-} from 'react-router-dom'
-import MainLayout from './app/layout/MainLayout.jsx'
-import Loader from './app/ui/Loader.jsx'
-import ErrorBoundary from './app/ui/ErrorBoundary.jsx'
+} from 'react-router-dom';
+import MainLayout from './app/layout/MainLayout.jsx';
+import Loader from './app/ui/Loader.jsx';
+import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
 import { AuthProvider } from './app/hooks/authHook.js';
-import RequireAuth from './app/components/auth/RequireAuth.jsx'
+import { ProductProvider } from './app/context/ProductContext.jsx'
+import RequireAuth from './app/components/auth/RequireAuth.jsx';
 import RequireGuest from './app/components/auth/RequireGuest.jsx'
 
 // Lazy load components with preloading
-const Homepage = lazy(() => import('./app/components/Homepage.jsx'))
+const Homepage = lazy(() => import('./app/components/HomePage.jsx'))
 const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'))
 const NotFound = lazy(() => import('./app/components/NotFound.jsx'))
 const LoginPage = lazy(() => import('./app/components/auth/LoginPage.jsx'))
@@ -30,12 +31,12 @@ import NetworkError from './app/ui/NetworkError.jsx';
 // Performance optimization: Preload critical routes
 const preloadRoutes = () => {
   const preloadPromises = [
-    import('./app/components/Homepage.jsx'),
+    import('./app/components/HomePage.jsx'),
     import('./app/components/ProductPage.jsx'),
     import('./app/components/auth/LoginPage.jsx'),
     import('./app/components/auth/RegisterPage.jsx')
   ];
-  
+
   Promise.allSettled(preloadPromises).catch(() => {
     // Silent fail for preloading
   })
@@ -66,7 +67,9 @@ const router = createBrowserRouter(
       path="/"
       element={
         <AuthProvider>
-          <MainLayout />
+          <ProductProvider>
+            <MainLayout />
+          </ProductProvider>
         </AuthProvider>
       }
       errorElement={<RouteError />}
@@ -85,7 +88,7 @@ const router = createBrowserRouter(
         }
         errorElement={<NetworkError />}
       />
-      
+
       {/* Auth Routes - Public */}
       <Route
         path="login"
@@ -97,7 +100,7 @@ const router = createBrowserRouter(
           </RequireGuest>
         }
       />
-      
+
       <Route
         path="register"
         element={
@@ -108,7 +111,7 @@ const router = createBrowserRouter(
           </RequireGuest>
         }
       />
-      
+
       {/* Product Routes */}
       <Route
         path="products"
@@ -133,7 +136,7 @@ const router = createBrowserRouter(
           }}
         />
       </Route>
-      
+
       {/* Category Routes */}
       <Route
         path="category/:category"
@@ -144,7 +147,7 @@ const router = createBrowserRouter(
         }
         loader={({ params }) => searchLoader(params.category)}
       />
-      
+
       {/* Search Route */}
       <Route
         path="search"
@@ -159,7 +162,7 @@ const router = createBrowserRouter(
           return searchLoader(query)
         }}
       />
-      
+
       {/* Deals & Specials */}
       <Route
         path="deals"
@@ -170,7 +173,7 @@ const router = createBrowserRouter(
         }
         loader={() => searchLoader('deals')}
       />
-      
+
       <Route
         path="bestsellers"
         element={
@@ -180,7 +183,7 @@ const router = createBrowserRouter(
         }
         loader={() => searchLoader('bestsellers')}
       />
-      
+
       <Route
         path="new"
         element={
@@ -190,13 +193,13 @@ const router = createBrowserRouter(
         }
         loader={() => searchLoader('new')}
       />
-      
+
       {/* Protected User Routes */}
-      
+
       {/* Protected Admin Routes */}
-      
+
       {/* Static Pages */}
-      
+
       {/* Catch-all 404 route */}
       <Route
         path="*"
@@ -218,26 +221,15 @@ const router = createBrowserRouter(
     },
     window: typeof window !== 'undefined' ? window : undefined,
   }
-)
-
-// Performance monitoring
-const reportWebVitals = (metric) => {
-  if (metric.name === 'CLS' || metric.name === 'FID' || metric.name === 'LCP') {
-    console.log('Performance Metric:', metric)
-    // In production, send to analytics service
-    if (process.env.NODE_ENV === 'production') {
-      // Example: sendToAnalytics(metric)
-    }
-  }
-}
+);
 
 const App = () => {
   const MemoizedRouterProvider = React.memo(RouterProvider)
-  
+
   return (
     <ErrorBoundary>
       <React.StrictMode>
-        <MemoizedRouterProvider 
+        <MemoizedRouterProvider
           router={router}
           fallbackElement={
             <div className="app-loading">
