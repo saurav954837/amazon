@@ -1,8 +1,13 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faChevronLeft, 
+  faChevronRight,
+  faFastBackward,
+  faFastForward
+} from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import styles from '../styles/Homepage.module.css';
 
@@ -11,9 +16,14 @@ const MemoizedProductCard = memo(ProductCard);
 const Homepage = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [productsPerPage, setProductsPerPage] = useState(8)
   
-  const { featuredProducts, deals, recommended, loading, error } = useProduct()
+  const { products, loading, error } = useProduct()
   const navigate = useNavigate()
+  
+  // Ref for scrolling to top
+  const topOfPageRef = useRef(null)
 
   const heroSlides = [
     {
@@ -45,6 +55,61 @@ const Homepage = () => {
       mobileImage: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80'
     }
   ]
+
+  // Calculate pagination
+  const indexOfLastProduct = currentPage * productsPerPage
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct)
+  const totalPages = Math.ceil(products.length / productsPerPage)
+
+  // Scroll to top of page function
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  }, [])
+
+  // Handle page change with scroll to top
+  const handlePageChange = useCallback((pageNumber) => {
+    setCurrentPage(pageNumber)
+    
+    // Scroll to top after a small delay to ensure page update
+    setTimeout(() => {
+      scrollToTop()
+    }, 100)
+  }, [scrollToTop])
+
+  // Updated pagination handlers with scroll to top
+  const nextPage = useCallback(() => {
+    const nextPageNum = Math.min(currentPage + 1, totalPages)
+    setCurrentPage(nextPageNum)
+    scrollToTop()
+  }, [currentPage, totalPages, scrollToTop])
+
+  const prevPage = useCallback(() => {
+    const prevPageNum = Math.max(currentPage - 1, 1)
+    setCurrentPage(prevPageNum)
+    scrollToTop()
+  }, [currentPage, scrollToTop])
+
+  const goToFirstPage = useCallback(() => {
+    setCurrentPage(1)
+    scrollToTop()
+  }, [scrollToTop])
+
+  const goToLastPage = useCallback(() => {
+    setCurrentPage(totalPages)
+    scrollToTop()
+  }, [totalPages, scrollToTop])
+
+  // Handle page size change with scroll to top
+  const handlePageSizeChange = useCallback((e) => {
+    const newPageSize = Number(e.target.value)
+    setProductsPerPage(newPageSize)
+    setCurrentPage(1)
+    scrollToTop()
+  }, [scrollToTop])
 
   const handleProductAction = useCallback((action, productId) => {
     navigate('/register', { 
@@ -105,8 +170,35 @@ const Homepage = () => {
     )
   }
 
+  // Generate page numbers
+  const getPageNumbers = () => {
+    const pageNumbers = []
+    const maxPagesToShow = 5
+    
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i)
+      }
+    } else {
+      let startPage = Math.max(1, currentPage - 2)
+      let endPage = Math.min(totalPages, currentPage + 2)
+      
+      if (currentPage <= 3) {
+        endPage = maxPagesToShow
+      } else if (currentPage >= totalPages - 2) {
+        startPage = totalPages - maxPagesToShow + 1
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i)
+      }
+    }
+    
+    return pageNumbers
+  }
+
   return (
-    <div className={styles.homepage}>
+    <div className={styles.homepage} ref={topOfPageRef}>
       <div className={styles.heroSection}>
         <div className={styles.heroCarousel}>
           <div className={styles.slidesContainer} style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
@@ -168,64 +260,104 @@ const Homepage = () => {
       </div>
 
       <div className={styles.container}>
-        {featuredProducts.length > 0 && (
-          <section className={styles.productSection} aria-labelledby="featured-products">
-            <div className={styles.sectionHeader}>
-              <h2 id="featured-products" className={styles.sectionTitle}>Featured Products</h2>
-              <a href="/products" className={styles.seeAllLink}>See all</a>
-            </div>
-            <div className={styles.productsGrid}>
-              {featuredProducts.map(product => (
-                <MemoizedProductCard 
-                  key={product.product_id || product.id} 
-                  product={product} 
-                  onAddToCart={() => handleProductAction('add to cart', product.product_id || product.id)}
-                  onBuyNow={() => handleProductAction('buy', product.product_id || product.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+        {/* All Products Section with Pagination */}
+        <section 
+          className={styles.allProductsSection} 
+          aria-labelledby="all-products"
+        >
+          <div className={styles.sectionHeader}>
+            <h2 id="all-products" className={styles.sectionTitle}>
+              All Products <span className={styles.productCount}>({products.length} products)</span>
+            </h2>
+            
+            {/* Optional: Add a "Back to Top" button */}
+            {products.length > productsPerPage && (
+              <button 
+                className={styles.backToTopBtn}
+                onClick={scrollToTop}
+                aria-label="Scroll to top of page"
+              >
+                ↑ Top
+              </button>
+            )}
+          </div>
+          
+          {/* Product Grid */}
+          <div className={styles.productsGrid}>
+            {currentProducts.map(product => (
+              <MemoizedProductCard 
+                key={product.product_id || product.id} 
+                product={product} 
+                onAddToCart={() => handleProductAction('add to cart', product.product_id || product.id)}
+                onBuyNow={() => handleProductAction('buy', product.product_id || product.id)}
+              />
+            ))}
+          </div>
 
-        {/* Today's Deals Section */}
-        {deals.length > 0 && (
-          <section className={styles.productSection} aria-labelledby="todays-deals">
-            <div className={styles.sectionHeader}>
-              <h2 id="todays-deals" className={styles.sectionTitle}>Today's Deals</h2>
-              <a href="/deals" className={styles.seeAllLink}>See all deals</a>
-            </div>
-            <div className={styles.productsGrid}>
-              {deals.map(product => (
-                <MemoizedProductCard 
-                  key={product.product_id || product.id} 
-                  product={product} 
-                  onAddToCart={() => handleProductAction('add to cart', product.product_id || product.id)}
-                  onBuyNow={() => handleProductAction('buy', product.product_id || product.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+          {/* Pagination Component */}
+          {products.length > productsPerPage && (
+            <div className={styles.paginationContainer}>
+              <div className={styles.paginationInfo}>
+                Showing {indexOfFirstProduct + 1} - {Math.min(indexOfLastProduct, products.length)} of {products.length} products
+              </div>
+              
+              <nav className={styles.pagination} aria-label="Product pagination">
+                <button
+                  className={styles.paginationBtn}
+                  onClick={goToFirstPage}
+                  disabled={currentPage === 1}
+                  aria-label="Go to first page"
+                >
+                  <FontAwesomeIcon icon={faFastBackward} />
+                </button>
+                
+                <button
+                  className={styles.paginationBtn}
+                  onClick={prevPage}
+                  disabled={currentPage === 1}
+                  aria-label="Go to previous page"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
 
-        {/* Recommended Products Section */}
-        {recommended.length > 0 && (
-          <section className={styles.productSection} aria-labelledby="recommended">
-            <div className={styles.sectionHeader}>
-              <h2 id="recommended" className={styles.sectionTitle}>Recommended for You</h2>
-              <a href="/recommended" className={styles.seeAllLink}>See more</a>
+                {/* Page Numbers */}
+                <div className={styles.pageNumbers}>
+                  {getPageNumbers().map(number => (
+                    <button
+                      key={number}
+                      className={`${styles.pageBtn} ${currentPage === number ? styles.active : ''}`}
+                      onClick={() => handlePageChange(number)}
+                      aria-label={`Go to page ${number}`}
+                      aria-current={currentPage === number ? 'page' : undefined}
+                    >
+                      {number}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  className={styles.paginationBtn}
+                  onClick={nextPage}
+                  disabled={currentPage === totalPages}
+                  aria-label="Go to next page"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+                
+                <button
+                  className={styles.paginationBtn}
+                  onClick={goToLastPage}
+                  disabled={currentPage === totalPages}
+                  aria-label="Go to last page"
+                >
+                  <FontAwesomeIcon icon={faFastForward} />
+                </button>
+              </nav>
+              
+              {/* Products per page selector - REMOVED since you have fixed 8 per page */}
             </div>
-            <div className={styles.productsGrid}>
-              {recommended.map(product => (
-                <MemoizedProductCard 
-                  key={product.product_id || product.id} 
-                  product={product} 
-                  onAddToCart={() => handleProductAction('add to cart', product.product_id || product.id)}
-                  onBuyNow={() => handleProductAction('buy', product.product_id || product.id)}
-                />
-              ))}
-            </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {/* Categories Section */}
         <section className={styles.categoriesSection} aria-labelledby="shop-categories">

@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStar, faStarHalfAlt, faTruck } from '@fortawesome/free-solid-svg-icons';
+import { faTruck } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/ProductCard.module.css';
@@ -45,26 +45,16 @@ const ProductCard = ({ product }) => {
     return product.product_image || product.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=500&q=80';
   }
 
-  const renderStars = (rating) => {
-    const safeRating = rating || 4;
-    const stars = []
-    const fullStars = Math.floor(safeRating)
-    const hasHalfStar = safeRating % 1 >= 0.5
-    
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<FontAwesomeIcon key={`full-${i}`} icon={faStar} className={styles.starFull} />)
-    }
-    
-    if (hasHalfStar) {
-      stars.push(<FontAwesomeIcon key="half" icon={faStarHalfAlt} className={styles.starHalf} />)
-    }
-    
-    const emptyStars = 5 - stars.length
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<FontAwesomeIcon key={`empty-${i}`} icon={faStar} className={styles.starEmpty} />)
-    }
-    
-    return stars
+  const getProductCategory = () => {
+    return product.product_category || product.category || 'Uncategorized';
+  }
+
+  const getProductDescription = () => {
+    return product.product_desc || product.description || 'No description available';
+  }
+
+  const getProductStock = () => {
+    return product.product_quantity || product.quantity || 0;
   }
 
   const formatPrice = (price) => {
@@ -116,12 +106,6 @@ const ProductCard = ({ product }) => {
     navigate('/cart')
   }
 
-  const handleWishlist = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // Wishlist logic here
-  }
-
   const handleCardClick = (e) => {
     if (e.target.closest('button')) return
     if (productId) {
@@ -144,13 +128,6 @@ const ProductCard = ({ product }) => {
         {discount > 0 && (
           <span className={styles.discountBadge}>-{discount}%</span>
         )}
-        <button 
-          className={styles.wishlistBtn}
-          onClick={handleWishlist}
-          aria-label={`Add ${getProductName()} to wishlist`}
-        >
-          ♡
-        </button>
       </div>
       
       <div className={styles.productInfo}>
@@ -158,11 +135,22 @@ const ProductCard = ({ product }) => {
           {getProductName()}
         </h3>
         
-        <div className={styles.ratingContainer}>
-          <div className={styles.stars}>
-            {renderStars(product.rating)}
-          </div>
-          <span className={styles.reviewCount}>({product.reviewCount || 100})</span>
+        <div className={styles.productCategory}>
+          <span className={styles.categoryLabel}>Category:</span>
+          <span className={styles.categoryValue}>{getProductCategory()}</span>
+        </div>
+        
+        <div className={styles.productDescription}>
+          <p>{getProductDescription()}</p>
+        </div>
+        
+        <div className={styles.stockStatus}>
+          <span className={`${styles.stockIndicator} ${getProductStock() > 0 ? styles.inStock : styles.outOfStock}`}>
+            {getProductStock() > 0 ? 'In Stock' : 'Out of Stock'}
+          </span>
+          {getProductStock() > 0 && (
+            <span className={styles.stockCount}>({getProductStock()} available)</span>
+          )}
         </div>
         
         <div className={styles.priceContainer}>
@@ -181,11 +169,20 @@ const ProductCard = ({ product }) => {
           </div>
         )}
         
+        <div className={styles.productStatus}>
+          <span className={`${styles.statusBadge} ${
+            product.product_status === 'active' ? styles.statusActive : styles.statusInactive
+          }`}>
+            {product.product_status || 'active'}
+          </span>
+        </div>
+        
         <div className={styles.productActions}>
           <button 
             className={styles.addToCartBtn}
             onClick={handleAddToCart}
             aria-label={`Add ${getProductName()} to cart`}
+            disabled={getProductStock() <= 0}
           >
             Add to Cart
           </button>
@@ -193,6 +190,7 @@ const ProductCard = ({ product }) => {
             className={styles.buyNowBtn}
             onClick={handleBuyNow}
             aria-label={`Buy ${getProductName()} now`}
+            disabled={getProductStock() <= 0}
           >
             Buy Now
           </button>
@@ -202,4 +200,4 @@ const ProductCard = ({ product }) => {
   )
 }
 
-export default ProductCard
+export default ProductCard;

@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 // Routes
 import { productRouter } from "./routes/api/productRoutes.routes.js";
 import { authRouter } from "./routes/api/authRoutes.routes.js";
+import { cartRouter } from "./routes/api/cartRoutes.routes.js";
 
 // Config
 dotenv.config();
@@ -26,63 +27,78 @@ const limiter = rateLimit({
 });
 
 // App Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({
+    limit: "10kb",
+    verify: (req, res, buf) => {
+        try {
+            JSON.parse(buf.toString());
+        } catch (e) {
+            throw new Error('Invalid JSON payload');
+        }
+    }
+}));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-    credentials: process.env.CORS_CREDENTIALS
-}));
-app.use(helmet({
-    contentSecurityPolicy: false
-}));
+
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(",")
+        : "http://localhost:5173",
+    credentials: process.env.CORS_CREDENTIALS === "true",
+    optionsSuccessStatus: 200,
+    exposedHeaders: ["X-RateLimit-Limit", "X-RateLimit-Remaining"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+};
+app.use(cors(corsOptions));
+
+app.use(
+    helmet({
+        contentSecurityPolicy: process.env.NODE_ENV === "production" ? cspDirectives : false,
+        crossOriginEmbedderPolicy: false,
+        crossOriginResourcePolicy: { policy: "cross-origin" },
+        referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    })
+);
+
 app.use(cookieParser());
 app.use("/api/", limiter);
 
 // Routes
 app.use("/api/products/", productRouter);
 app.use("/api/auth/", authRouter);
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-    res.json({
-        status: "healthy",
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
+app.use("/api/cart/", cartRouter);
 
 // 404 handler
 app.use((req, res) => {
+    console.warn(`404 Not Found: ${req.method} ${req.originalUrl}`);
     res.status(404).json({
-        message: "Endpoint not found",
+        message: "Endpoint not found.",
         success: false,
-        path: req.originalUrl
+        path: req.originalUrl,
     });
 });
 
 // Global Error handler
 app.use((err, req, res, next) => {
-    console.error(`Error: ${err.message}`);
-    console.error(`Stack: ${err.stack}`);
-    
-    const statusCode = err.statusCode || 500;
-    const message = process.env.NODE_ENV === "production" 
-        ? "Internal server error" 
-        : err.message;
-    
-    res.status(statusCode).json({
-        message: message,
+    console.error(`Message: ${err}`);
+    console.error(`Path: ${req.path}`);
+    console.error(`Method: ${req.method}`);
+    console.error(`IP: ${req.ip}`);
+
+    res.status(500).json({
+        message: "Internal Server Error.",
         success: false,
-        ...(process.env.NODE_ENV === "development" && { stack: err.stack })
     });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
-    console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-    console.log(`Started: ${new Date().toLocaleString()}`);
+    console.log(`
+📍 Server is running on: http://localhost:${PORT}
+🌍 Environment: ${process.env.NODE_ENV || "development"}
+🕒 Started: ${new Date().toLocaleString()}
+🔗 Frontend: ${process.env.FRONTEND_URL}
+`);
 });
 
 export default app;

@@ -127,12 +127,12 @@ const router = createBrowserRouter(
           loader={searchLoader}
         />
         <Route
-          path=":id"
+          path=":product_id"
           element={<ProductPage />}
-          loader={({ params }) => productLoader(params.id)}
+          loader={productLoader}
           errorElement={<RouteError />}
           shouldRevalidate={({ currentParams, nextParams }) => {
-            return currentParams.id !== nextParams.id
+            return currentParams.product_id !== nextParams.product_id;
           }}
         />
       </Route>

@@ -31,29 +31,38 @@ export const setCachedData = (key, data) => {
 }
 
 export const productLoader = async ({ params }) => {
-  const { id } = params
-  const cacheKey = getCacheKey(`product-${id}`)
-  const cached = getCachedData(cacheKey)
+  const { product_id } = params;
+
+  if (!product_id) {
+    throw new Error('Product ID is required');
+  }
+
+  const cacheKey = getCacheKey(`product-${product_id}`);
+  const cached = getCachedData(cacheKey);
   if (cached) {
-    return cached
+    return cached;
   }
 
   try {
-    const response = await api.get(`/products/${id}`, {
+    const response = await api.get(`/products/${product_id}`, {
       signal: AbortSignal.timeout(5000),
-    })
-    
-    const data = response.data
-    setCachedData(cacheKey, data)
-    return data
+    });
+
+    const data = response.data;
+    setCachedData(cacheKey, data);
+    return data;
   } catch (error) {
     if (axios.isCancel(error)) {
-      throw new Error('Request was cancelled')
+      throw new Error('Request was cancelled');
     }
     if (error.code === 'ECONNABORTED') {
-      throw new Error('Request timeout')
+      throw new Error('Request timeout');
     }
-    throw error.response?.data || new Error('Failed to load product')
+    if (error.response?.status === 404) {
+      throw new Response('Product not found', { status: 404 });
+    }
+
+    throw error.response?.data || new Error('Failed to load product');
   }
 };
 
@@ -66,8 +75,6 @@ export const homepageLoader = async () => {
 
   try {
     const [featured, deals, categories] = await Promise.all([
-      api.get('/products/featured'),
-      api.get('/products/deals'),
       api.get('/categories'),
     ]);
 

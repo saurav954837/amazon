@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faStar, 
-  faStarHalfAlt, 
   faTruck, 
   faShieldAlt,
   faChevronLeft,
   faShare,
-  faHeart,
-  faCartPlus
+  faCartPlus,
+  faBox,
+  faTag,
+  faCheckCircle,
+  faStar,
+  faStarHalfAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import axios from 'axios';
@@ -17,12 +19,11 @@ import ProductCard from './ProductCard.jsx';
 import styles from '../styles/ProductPage.module.css';
 
 const ProductPage = () => {
-  // FIXED: Safely destructure params
-  const params = useParams()
-  const id = params?.id // Use optional chaining
+  const params = useParams();
+  const product_id = params?.product_id;
   
   const navigate = useNavigate()
-  const { products, recommended } = useProduct()
+  const { products } = useProduct()
   const [product, setProduct] = useState(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -30,8 +31,7 @@ const ProductPage = () => {
   const [relatedProducts, setRelatedProducts] = useState([])
 
   useEffect(() => {
-    // Only fetch if id exists
-    if (!id) {
+    if (!product_id) {
       setLoading(false)
       return
     }
@@ -42,9 +42,8 @@ const ProductPage = () => {
       try {
         // Try to find in context first
         const foundProduct = products.find(p => {
-          // Try multiple ID properties
           const productId = p.product_id || p.id || p._id
-          return String(productId) === String(id)
+          return String(productId) === String(product_id)
         })
         
         if (foundProduct) {
@@ -53,27 +52,24 @@ const ProductPage = () => {
           // Get related products from same category
           const related = products.filter(p => {
             const productId = p.product_id || p.id || p._id
-            return String(productId) !== String(id) && 
+            return String(productId) !== String(product_id) && 
                    p.product_category === foundProduct.product_category
           }).slice(0, 4)
           
           setRelatedProducts(related)
         } else {
-          // Fallback to API call if not found in context
+          // Fallback to API call
           try {
-            console.log('🔄 Fetching product from API with ID:', id)
-            const response = await axios.get(`http://localhost:8000/api/products/${id}`)
-            console.log('✅ API response:', response.data)
+            const response = await axios.get(`http://localhost:8000/api/products/${product_id}`)
             
             if (response.data) {
               const apiProduct = response.data.product || response.data
               setProduct(apiProduct)
               
-              // Get related products if available
               if (apiProduct.product_category) {
                 const relatedFromAPI = products.filter(p => {
                   const productId = p.product_id || p.id || p._id
-                  return String(productId) !== String(id) && 
+                  return String(productId) !== String(product_id) && 
                          p.product_category === apiProduct.product_category
                 }).slice(0, 4)
                 
@@ -84,26 +80,25 @@ const ProductPage = () => {
             }
           } catch (apiError) {
             console.error('Error fetching product from API:', apiError)
-            // Use a mock product if API fails
             const mockProduct = {
-              product_id: id,
-              product_name: `Product ${id}`,
+              product_id: product_id,
+              product_name: `Product ${product_id}`,
               product_price: 99.99,
               product_image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
               product_category: 'Electronics',
-              product_desc: 'Premium quality product with excellent features.',
-              rating: 4.5,
-              reviewCount: 1247,
-              isPrime: true,
-              originalPrice: 149.99,
-              brand: 'Amazon',
+              product_desc: 'Premium quality product with excellent features. This product offers the best value for money with its advanced features and durable construction.',
               product_quantity: 50,
               product_status: 'active',
+              brand: 'Amazon',
+              originalPrice: 149.99,
+              rating: 4.5,
               features: [
                 'High quality materials',
                 'Durable construction',
                 'Easy to use',
-                'Excellent performance'
+                'Excellent performance',
+                'Value for money',
+                'Popular choice'
               ]
             }
             setProduct(mockProduct)
@@ -117,29 +112,24 @@ const ProductPage = () => {
     }
 
     fetchProduct()
-  }, [id, products])
+  }, [product_id, products])
 
-  // Also fix the missing addToCart function - add this helper function
   const addToCart = async (product, qty = 1) => {
-    // Add your cart logic here
     console.log('Adding to cart:', product, 'Quantity:', qty)
     return { success: true }
   }
 
-  // Fix getProductById - add this function
-  const getProductById = (id) => {
-    return products.find(p => {
-      const productId = p.product_id || p.id || p._id
-      return String(productId) === String(id)
-    })
-  }
+  // Single product image - removed extra images
+  const productImage = product?.product_image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'
 
-  const productImages = [
-    product?.product_image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80'
-  ]
+  const formatPrice = (price) => {
+    const safePrice = Number(price) || 0
+    return new Intl.NumberFormat('en-EG', {
+      style: 'currency',
+      currency: 'EGP',
+      minimumFractionDigits: 2
+    }).format(safePrice)
+  }
 
   const renderStars = (rating) => {
     const safeRating = rating || 4.5
@@ -163,21 +153,11 @@ const ProductPage = () => {
     return stars
   }
 
-  const formatPrice = (price) => {
-    const safePrice = Number(price) || 0
-    return new Intl.NumberFormat('en-EG', {
-      style: 'currency',
-      currency: 'EGP',
-      minimumFractionDigits: 2
-    }).format(safePrice)
-  }
-
   const handleAddToCart = async () => {
     if (!product) return
     
     const result = await addToCart(product, quantity)
     if (result.success) {
-      // Show success message
       alert('Added to cart successfully!')
     }
   }
@@ -204,7 +184,7 @@ const ProductPage = () => {
     }
   }
 
-  if (!id) {
+  if (!product_id) {
     return (
       <div className={styles.notFound}>
         <h2>Product ID not provided</h2>
@@ -242,79 +222,111 @@ const ProductPage = () => {
     ? Math.round(((product.originalPrice - product.product_price) / product.originalPrice) * 100)
     : 0
 
-  const colorOptions = ['Black', 'White', 'Silver', 'Blue', 'Red']
+  // Function to display all product details except excluded ones
+  const renderProductDetails = () => {
+    const excludedFields = ['product_id', 'created_at', 'updated_at', 'id', '_id', 'features', 'rating']
+    
+    return Object.entries(product).map(([key, value]) => {
+      // Skip excluded fields
+      if (excludedFields.includes(key)) return null;
+      
+      // Format the key for display
+      const formattedKey = key
+        .replace(/_/g, ' ')
+        .replace(/product_/g, '')
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      
+      // Format the value
+      let formattedValue = value;
+      
+      if (key === 'product_price' || key === 'price') {
+        formattedValue = formatPrice(value);
+      } else if (key === 'product_status' || key === 'status') {
+        formattedValue = (
+          <span className={`${styles.statusBadge} ${
+            value === 'active' ? styles.statusActive : styles.statusInactive
+          }`}>
+            {value}
+          </span>
+        );
+      } else if (typeof value === 'boolean') {
+        formattedValue = value ? 'Yes' : 'No';
+      }
+      
+      return (
+        <div key={key} className={styles.detailRow}>
+          <div className={styles.detailLabel}>{formattedKey}:</div>
+          <div className={styles.detailValue}>{formattedValue}</div>
+        </div>
+      );
+    }).filter(Boolean);
+  }
 
   return (
     <div className={styles.productPage}>
       <div className={styles.container}>
         {/* Breadcrumb */}
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <a href="/">Home</a>
-          <span>›</span>
-          <a href={`/category/${product.product_category?.toLowerCase().replace(/\s+/g, '-')}`}>
+          <button onClick={() => navigate('/')} className={styles.breadcrumbLink}>
+            Home
+          </button>
+          <span className={styles.breadcrumbSeparator}>›</span>
+          <button 
+            onClick={() => navigate(`/category/${product.product_category?.toLowerCase().replace(/\s+/g, '-')}`)}
+            className={styles.breadcrumbLink}
+          >
             {product.product_category || 'Category'}
-          </a>
-          <span>›</span>
+          </button>
+          <span className={styles.breadcrumbSeparator}>›</span>
           <span className={styles.current}>{product.product_name}</span>
         </nav>
 
         <div className={styles.productLayout}>
-          {/* Product Images */}
+          {/* Product Images - Single main image only */}
           <div className={styles.imageSection}>
-            <div className={styles.mainImage}>
+            <div className={styles.mainImageContainer}>
               <img 
-                src={productImages[selectedImage]} 
+                src={productImage} 
                 alt={product.product_name}
-                className={styles.selectedImage}
+                className={styles.mainImage}
                 loading="eager"
+                onError={(e) => {
+                  e.target.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'
+                }}
               />
-            </div>
-            
-            <div className={styles.thumbnailGrid}>
-              {productImages.map((image, index) => (
-                <button
-                  key={index}
-                  className={`${styles.thumbnail} ${selectedImage === index ? styles.active : ''}`}
-                  onClick={() => setSelectedImage(index)}
-                  aria-label={`View image ${index + 1}`}
-                >
-                  <img src={image} alt={`${product.product_name} view ${index + 1}`} />
-                </button>
-              ))}
+              {discount > 0 && (
+                <div className={styles.discountBadge}>
+                  <span className={styles.discountPercent}>-{discount}%</span>
+                  <span className={styles.discountLabel}>OFF</span>
+                </div>
+              )}
             </div>
             
             <div className={styles.imageActions}>
               <button className={styles.shareBtn} onClick={handleShare}>
                 <FontAwesomeIcon icon={faShare} />
-                Share
-              </button>
-              <button className={styles.wishlistBtn}>
-                <FontAwesomeIcon icon={faHeart} />
-                Add to Wishlist
+                Share Product
               </button>
             </div>
           </div>
 
           {/* Product Info */}
           <div className={styles.infoSection}>
-            <h1 className={styles.productTitle}>{product.product_name}</h1>
-            
-            <div className={styles.brandInfo}>
-              <span>Brand: </span>
-              <strong>{product.brand || 'Amazon'}</strong>
+            <div className={styles.productHeader}>
+              <h1 className={styles.productTitle}>{product.product_name}</h1>
+              <div className={styles.ratingContainer}>
+                <div className={styles.stars}>
+                  {renderStars(product.rating)}
+                </div>
+                <span className={styles.ratingText}>{product.rating || 4.5}/5</span>
+              </div>
             </div>
             
-            <div className={styles.ratingSection}>
-              <div className={styles.stars}>
-                {renderStars(product.rating)}
-              </div>
-              <a href="#reviews" className={styles.ratingCount}>
-                {product.rating || 4.5} ({product.reviewCount || 1247} ratings)
-              </a>
-              <span className={styles.divider}>|</span>
-              <a href="#questions" className={styles.questions}>
-                142 answered questions
-              </a>
+            <div className={styles.brandInfo}>
+              <span className={styles.brandLabel}>Brand:</span>
+              <span className={styles.brandValue}>{product.brand || 'Unknown'}</span>
             </div>
             
             <div className={styles.priceSection}>
@@ -323,74 +335,109 @@ const ProductPage = () => {
                 {product.originalPrice && product.originalPrice > product.product_price && (
                   <>
                     <span className={styles.originalPrice}>{formatPrice(product.originalPrice)}</span>
-                    <span className={styles.discount}>{discount}% off</span>
+                    <span className={styles.discountText}>{discount}% off</span>
                   </>
                 )}
               </div>
-              <div className={styles.installment}>
-                <strong>No Cost EMI available</strong>
-                <span>Pay with easy installments</span>
+              <div className={styles.installmentInfo}>
+                <FontAwesomeIcon icon={faCheckCircle} className={styles.checkIcon} />
+                <span>No Cost EMI available</span>
               </div>
             </div>
             
-            <div className={styles.primeBadge}>
-              <FontAwesomeIcon icon={faTruck} />
-              <div>
+            <div className={styles.descriptionSection}>
+              <h3 className={styles.sectionTitle}>Description</h3>
+              <p className={styles.productDescription}>{product.product_desc || 'No description available.'}</p>
+            </div>
+            
+            {product.features && product.features.length > 0 && (
+              <div className={styles.featuresSection}>
+                <h3 className={styles.sectionTitle}>Key Features</h3>
+                <ul className={styles.featuresList}>
+                  {product.features.map((feature, index) => (
+                    <li key={index} className={styles.featureItem}>
+                      <FontAwesomeIcon icon={faCheckCircle} className={styles.featureIcon} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <div className={styles.detailsGrid}>
+              {renderProductDetails()}
+            </div>
+            
+            <div className={styles.stockSection}>
+              <div className={styles.stockInfo}>
+                <FontAwesomeIcon icon={faBox} className={styles.stockIcon} />
+                <div className={styles.stockContent}>
+                  <strong>Stock Status: </strong>
+                  <span className={`${styles.stockStatusText} ${
+                    product.product_quantity > 0 ? styles.inStock : styles.outOfStock
+                  }`}>
+                    {product.product_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                  </span>
+                  {product.product_quantity > 0 && (
+                    <span className={styles.stockCount}> ({product.product_quantity} items available)</span>
+                  )}
+                </div>
+              </div>
+              
+              <div className={styles.categoryInfo}>
+                <FontAwesomeIcon icon={faTag} className={styles.categoryIcon} />
+                <div>
+                  <strong>Category: </strong>
+                  <span className={styles.categoryValue}>{product.product_category || 'Uncategorized'}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className={styles.primeDelivery}>
+              <FontAwesomeIcon icon={faTruck} className={styles.primeIcon} />
+              <div className={styles.primeContent}>
                 <strong>FREE delivery</strong>
                 <span>Tomorrow, 9am - 12pm. Order within 5 hrs 30 mins</span>
               </div>
             </div>
             
-            <div className={styles.warrantyBadge}>
-              <FontAwesomeIcon icon={faShieldAlt} />
-              <div>
+            <div className={styles.warrantyInfo}>
+              <FontAwesomeIcon icon={faShieldAlt} className={styles.warrantyIcon} />
+              <div className={styles.warrantyContent}>
                 <strong>1 Year Warranty</strong>
                 <span>Manufacturer warranty included</span>
               </div>
             </div>
             
-            <div className={styles.colorSection}>
-              <h3>Color:</h3>
-              <div className={styles.colorOptions}>
-                {colorOptions.map((color, index) => (
-                  <button
-                    key={index}
-                    className={styles.colorOption}
-                    style={{ backgroundColor: color.toLowerCase() }}
-                    title={color}
-                    aria-label={`Select ${color} color`}
-                  />
-                ))}
-              </div>
-            </div>
-            
             <div className={styles.quantitySection}>
-              <h3>Quantity:</h3>
+              <div className={styles.quantityHeader}>
+                <h3 className={styles.quantityTitle}>Quantity:</h3>
+                <span className={styles.maxQuantity}>Max: {product.product_quantity || 10}</span>
+              </div>
               <div className={styles.quantitySelector}>
                 <button 
+                  className={styles.quantityBtn}
                   onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                  disabled={quantity <= 1}
+                  disabled={quantity <= 1 || product.product_quantity <= 0}
                   aria-label="Decrease quantity"
                 >
                   -
                 </button>
-                <span>{quantity}</span>
+                <span className={styles.quantityValue}>{quantity}</span>
                 <button 
+                  className={styles.quantityBtn}
                   onClick={() => setQuantity(prev => prev + 1)}
-                  disabled={quantity >= (product.product_quantity || 10)}
+                  disabled={quantity >= (product.product_quantity || 10) || product.product_quantity <= 0}
                   aria-label="Increase quantity"
                 >
                   +
                 </button>
               </div>
-              <span className={styles.stockInfo}>
-                {product.product_quantity || 10} items left
-              </span>
             </div>
             
             <div className={styles.actionButtons}>
               <button 
-                className={styles.addToCartBtn} 
+                className={`${styles.addToCartBtn} ${product.product_quantity <= 0 ? styles.disabled : ''}`} 
                 onClick={handleAddToCart}
                 disabled={product.product_quantity <= 0}
               >
@@ -398,7 +445,7 @@ const ProductPage = () => {
                 Add to Cart
               </button>
               <button 
-                className={styles.buyNowBtn} 
+                className={`${styles.buyNowBtn} ${product.product_quantity <= 0 ? styles.disabled : ''}`} 
                 onClick={handleBuyNow}
                 disabled={product.product_quantity <= 0}
               >
@@ -410,72 +457,6 @@ const ProductPage = () => {
               <FontAwesomeIcon icon={faShieldAlt} />
               <span>Secure transaction with SSL encryption</span>
             </div>
-            
-            <div className={styles.soldBy}>
-              <span>Ships from and sold by </span>
-              <strong>Amazon.eg</strong>
-              <span> • Fulfilled by Amazon</span>
-            </div>
-          </div>
-
-          {/* Product Details */}
-          <div className={styles.detailsSection}>
-            <div className={styles.detailsCard}>
-              <h2>About this item</h2>
-              <div className={styles.productDescription}>
-                <p>{product.product_desc || 'Premium quality product with excellent features.'}</p>
-              </div>
-              
-              <div className={styles.featuresList}>
-                <h3>Key Features:</h3>
-                <ul>
-                  {product.features?.map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  )) || [
-                    'High quality materials',
-                    'Durable construction',
-                    'Easy to use',
-                    'Excellent performance',
-                    'Value for money',
-                    'Popular choice'
-                  ].map((feature, index) => (
-                    <li key={index}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
-              
-              <div className={styles.specifications}>
-                <h3>Specifications:</h3>
-                <div className={styles.specGrid}>
-                  <div className={styles.specItem}>
-                    <span>Brand</span>
-                    <span>{product.brand || 'Amazon Basics'}</span>
-                  </div>
-                  <div className={styles.specItem}>
-                    <span>Model</span>
-                    <span>{product.model || 'PRO-2024'}</span>
-                  </div>
-                  <div className={styles.specItem}>
-                    <span>Category</span>
-                    <span>{product.product_category || 'General'}</span>
-                  </div>
-                  <div className={styles.specItem}>
-                    <span>Warranty</span>
-                    <span>1 year</span>
-                  </div>
-                  <div className={styles.specItem}>
-                    <span>Stock</span>
-                    <span>{product.product_quantity || 10} units available</span>
-                  </div>
-                  <div className={styles.specItem}>
-                    <span>Status</span>
-                    <span className={product.product_status === 'active' ? styles.statusActive : styles.statusInactive}>
-                      {product.product_status || 'active'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -486,18 +467,6 @@ const ProductPage = () => {
             <div className={styles.relatedGrid}>
               {relatedProducts.map(relatedProduct => (
                 <ProductCard key={relatedProduct.product_id} product={relatedProduct} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Recommended Products */}
-        {recommended.length > 0 && (
-          <section className={styles.relatedProducts}>
-            <h2 className={styles.relatedTitle}>Recommended for You</h2>
-            <div className={styles.relatedGrid}>
-              {recommended.slice(0, 4).map(recProduct => (
-                <ProductCard key={recProduct.product_id} product={recProduct} />
               ))}
             </div>
           </section>

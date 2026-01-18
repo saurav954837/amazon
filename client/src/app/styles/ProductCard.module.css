@@ -225,3 +225,82 @@
     gap: 5px;
   }
 }
+
+.productCategory {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.categoryLabel {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.categoryValue {
+  color: #0066c0;
+}
+
+.productDescription {
+  margin: 0.75rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #555;
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.stockStatus {
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stockIndicator {
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stockIndicator.inStock {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.stockIndicator.outOfStock {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.stockCount {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.productStatus {
+  margin: 0.5rem 0;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.statusActive {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.statusInactive {
+  background-color: #f8d7da;
+  color: #721c24;
+}

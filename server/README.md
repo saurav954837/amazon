@@ -121,6 +121,14 @@ server/
 * `PUT /api/products/:product_id` – Update products (Admins only)
 * `DELETE /api/products/:id` – Delete products (Admins only) 
 
+### 🛒 Cart Management
+* `POST /api/cart` – Add product to cart
+* `GET /api/cart` – Get user's cart
+* `GET /api/cart/summary` – Get cart summary (total items, quantity, price)
+* `PUT /api/cart/:cart_id` – Update cart item quantity
+* `DELETE /api/cart/:cart_id` – Remove item from cart
+* `DELETE /api/cart` – Clear entire cart
+
 ---
 ## 🔒 Security Features
 * Helmet.js security headers
