@@ -11,7 +11,8 @@ import {
   faTag,
   faCheckCircle,
   faStar,
-  faStarHalfAlt
+  faStarHalfAlt,
+  faCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import axios from 'axios';
@@ -23,12 +24,14 @@ const ProductPage = () => {
   const product_id = params?.product_id;
   
   const navigate = useNavigate()
-  const { products } = useProduct()
+  const { products, cart, addToCart, updateCartQuantity } = useProduct()
   const [product, setProduct] = useState(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
   const [loading, setLoading] = useState(true)
   const [relatedProducts, setRelatedProducts] = useState([])
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
 
   useEffect(() => {
     if (!product_id) {
@@ -40,7 +43,6 @@ const ProductPage = () => {
       setLoading(true)
       
       try {
-        // Try to find in context first
         const foundProduct = products.find(p => {
           const productId = p.product_id || p.id || p._id
           return String(productId) === String(product_id)
@@ -49,7 +51,6 @@ const ProductPage = () => {
         if (foundProduct) {
           setProduct(foundProduct)
           
-          // Get related products from same category
           const related = products.filter(p => {
             const productId = p.product_id || p.id || p._id
             return String(productId) !== String(product_id) && 
@@ -58,7 +59,6 @@ const ProductPage = () => {
           
           setRelatedProducts(related)
         } else {
-          // Fallback to API call
           try {
             const response = await axios.get(`http://localhost:8000/api/products/${product_id}`)
             
@@ -114,12 +114,67 @@ const ProductPage = () => {
     fetchProduct()
   }, [product_id, products])
 
-  const addToCart = async (product, qty = 1) => {
-    console.log('Adding to cart:', product, 'Quantity:', qty)
-    return { success: true }
+  const isProductInCart = () => {
+    return cart.some(item => item.product_id === product?.product_id)
   }
 
-  // Single product image - removed extra images
+  const getCartItemQuantity = () => {
+    const cartItem = cart.find(item => item.product_id === product?.product_id)
+    return cartItem ? cartItem.quantity : 0
+  }
+
+  const handleAddToCart = async () => {
+    if (!product || product.product_quantity <= 0) return
+    
+    setIsAddingToCart(true)
+    try {
+      await addToCart(product, quantity)
+      setAddedToCart(true)
+      
+      setTimeout(() => {
+        setAddedToCart(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Failed to add to cart:', error)
+      alert('Failed to add to cart. Please try again.')
+    } finally {
+      setIsAddingToCart(false)
+    }
+  }
+
+  const handleBuyNow = async () => {
+    if (!product || product.product_quantity <= 0) return
+    
+    setIsAddingToCart(true)
+    try {
+      await addToCart(product, quantity)
+      navigate('/cart')
+    } catch (error) {
+      console.error('Failed to add to cart:', error)
+      alert('Failed to add to cart. Please try again.')
+    } finally {
+      setIsAddingToCart(false)
+    }
+  }
+
+  const handleUpdateCartQuantity = async (newQuantity) => {
+    if (!product) return
+    
+    try {
+      if (newQuantity === 0) {
+        return
+      }
+      
+      const existingQuantity = getCartItemQuantity()
+      if (existingQuantity > 0) {
+        await updateCartQuantity(product.product_id, newQuantity)
+        setQuantity(newQuantity)
+      }
+    } catch (error) {
+      console.error('Failed to update cart quantity:', error)
+    }
+  }
+
   const productImage = product?.product_image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'
 
   const formatPrice = (price) => {
@@ -151,24 +206,6 @@ const ProductPage = () => {
     }
     
     return stars
-  }
-
-  const handleAddToCart = async () => {
-    if (!product) return
-    
-    const result = await addToCart(product, quantity)
-    if (result.success) {
-      alert('Added to cart successfully!')
-    }
-  }
-
-  const handleBuyNow = async () => {
-    if (!product) return
-    
-    const result = await addToCart(product, quantity)
-    if (result.success) {
-      navigate('/cart')
-    }
   }
 
   const handleShare = () => {
@@ -222,15 +259,17 @@ const ProductPage = () => {
     ? Math.round(((product.originalPrice - product.product_price) / product.originalPrice) * 100)
     : 0
 
-  // Function to display all product details except excluded ones
+  const isInCart = isProductInCart()
+  const cartItemQuantity = getCartItemQuantity()
+  const maxQuantity = product.product_quantity || 10
+  const availableQuantity = maxQuantity - (isInCart ? cartItemQuantity : 0)
+
   const renderProductDetails = () => {
     const excludedFields = ['product_id', 'created_at', 'updated_at', 'id', '_id', 'features', 'rating']
     
     return Object.entries(product).map(([key, value]) => {
-      // Skip excluded fields
       if (excludedFields.includes(key)) return null;
       
-      // Format the key for display
       const formattedKey = key
         .replace(/_/g, ' ')
         .replace(/product_/g, '')
@@ -238,7 +277,6 @@ const ProductPage = () => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
       
-      // Format the value
       let formattedValue = value;
       
       if (key === 'product_price' || key === 'price') {
@@ -267,7 +305,6 @@ const ProductPage = () => {
   return (
     <div className={styles.productPage}>
       <div className={styles.container}>
-        {/* Breadcrumb */}
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
           <button onClick={() => navigate('/')} className={styles.breadcrumbLink}>
             Home
@@ -284,7 +321,6 @@ const ProductPage = () => {
         </nav>
 
         <div className={styles.productLayout}>
-          {/* Product Images - Single main image only */}
           <div className={styles.imageSection}>
             <div className={styles.mainImageContainer}>
               <img 
@@ -312,7 +348,6 @@ const ProductPage = () => {
             </div>
           </div>
 
-          {/* Product Info */}
           <div className={styles.infoSection}>
             <div className={styles.productHeader}>
               <h1 className={styles.productTitle}>{product.product_name}</h1>
@@ -344,6 +379,13 @@ const ProductPage = () => {
                 <span>No Cost EMI available</span>
               </div>
             </div>
+            
+            {isInCart && (
+              <div className={styles.cartNotification}>
+                <FontAwesomeIcon icon={faCheck} className={styles.cartCheckIcon} />
+                <span>This item is already in your cart ({cartItemQuantity} {cartItemQuantity === 1 ? 'item' : 'items'})</span>
+              </div>
+            )}
             
             <div className={styles.descriptionSection}>
               <h3 className={styles.sectionTitle}>Description</h3>
@@ -384,6 +426,19 @@ const ProductPage = () => {
                 </div>
               </div>
               
+              {isInCart && (
+                <div className={styles.cartSummary}>
+                  <FontAwesomeIcon icon={faCartPlus} className={styles.cartSummaryIcon} />
+                  <div>
+                    <strong>In Your Cart: </strong>
+                    <span className={styles.cartQuantity}>{cartItemQuantity} {cartItemQuantity === 1 ? 'item' : 'items'}</span>
+                    <span className={styles.cartTotal}>
+                      ({formatPrice(product.product_price * cartItemQuantity)})
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <div className={styles.categoryInfo}>
                 <FontAwesomeIcon icon={faTag} className={styles.categoryIcon} />
                 <div>
@@ -412,13 +467,24 @@ const ProductPage = () => {
             <div className={styles.quantitySection}>
               <div className={styles.quantityHeader}>
                 <h3 className={styles.quantityTitle}>Quantity:</h3>
-                <span className={styles.maxQuantity}>Max: {product.product_quantity || 10}</span>
+                <span className={styles.maxQuantity}>
+                  {isInCart ? 
+                    `Available: ${availableQuantity}` : 
+                    `Max: ${maxQuantity}`
+                  }
+                </span>
               </div>
               <div className={styles.quantitySelector}>
                 <button 
                   className={styles.quantityBtn}
-                  onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                  disabled={quantity <= 1 || product.product_quantity <= 0}
+                  onClick={() => {
+                    const newQty = Math.max(1, quantity - 1)
+                    setQuantity(newQty)
+                    if (isInCart) {
+                      handleUpdateCartQuantity(newQty)
+                    }
+                  }}
+                  disabled={quantity <= 1 || product.product_quantity <= 0 || (isInCart && availableQuantity <= 0)}
                   aria-label="Decrease quantity"
                 >
                   -
@@ -426,8 +492,18 @@ const ProductPage = () => {
                 <span className={styles.quantityValue}>{quantity}</span>
                 <button 
                   className={styles.quantityBtn}
-                  onClick={() => setQuantity(prev => prev + 1)}
-                  disabled={quantity >= (product.product_quantity || 10) || product.product_quantity <= 0}
+                  onClick={() => {
+                    const newQty = quantity + 1
+                    setQuantity(newQty)
+                    if (isInCart) {
+                      handleUpdateCartQuantity(newQty)
+                    }
+                  }}
+                  disabled={
+                    quantity >= (isInCart ? availableQuantity : maxQuantity) || 
+                    product.product_quantity <= 0 || 
+                    (isInCart && availableQuantity <= 0)
+                  }
                   aria-label="Increase quantity"
                 >
                   +
@@ -437,19 +513,39 @@ const ProductPage = () => {
             
             <div className={styles.actionButtons}>
               <button 
-                className={`${styles.addToCartBtn} ${product.product_quantity <= 0 ? styles.disabled : ''}`} 
+                className={`${styles.addToCartBtn} ${
+                  product.product_quantity <= 0 ? styles.disabled : ''
+                } ${isInCart ? styles.inCart : ''} ${addedToCart ? styles.added : ''}`} 
                 onClick={handleAddToCart}
-                disabled={product.product_quantity <= 0}
+                disabled={product.product_quantity <= 0 || isAddingToCart || (isInCart && availableQuantity <= 0)}
               >
-                <FontAwesomeIcon icon={faCartPlus} />
-                Add to Cart
+                {isAddingToCart ? (
+                  <span className={styles.loadingText}>Adding...</span>
+                ) : addedToCart ? (
+                  <>
+                    <FontAwesomeIcon icon={faCheck} />
+                    <span>Added!</span>
+                  </>
+                ) : isInCart ? (
+                  <>
+                    <FontAwesomeIcon icon={faCartPlus} />
+                    <span>Update Cart ({cartItemQuantity})</span>
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faCartPlus} />
+                    <span>Add to Cart</span>
+                  </>
+                )}
               </button>
               <button 
-                className={`${styles.buyNowBtn} ${product.product_quantity <= 0 ? styles.disabled : ''}`} 
+                className={`${styles.buyNowBtn} ${
+                  product.product_quantity <= 0 ? styles.disabled : ''
+                } ${isInCart ? styles.inCart : ''}`} 
                 onClick={handleBuyNow}
-                disabled={product.product_quantity <= 0}
+                disabled={product.product_quantity <= 0 || isAddingToCart || (isInCart && availableQuantity <= 0)}
               >
-                Buy Now
+                {isInCart ? 'Buy More Now' : 'Buy Now'}
               </button>
             </div>
             
@@ -460,7 +556,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className={styles.relatedProducts}>
             <h2 className={styles.relatedTitle}>Related Products</h2>

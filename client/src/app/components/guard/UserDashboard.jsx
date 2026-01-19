@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/authHook.js';
+import { useProduct } from '../../context/ProductContext.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faShoppingCart, faBox, faCreditCard, faHistory } from '@fortawesome/free-solid-svg-icons';
 import styles from '../../styles/UserDashboard.module.css';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
+  const { cart, getCartTotal } = useProduct();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -17,9 +19,9 @@ const UserDashboard = () => {
 
   const dashboardStats = [
     { label: 'Orders', value: '0', icon: faBox, color: styles.iconBlue },
-    { label: 'Cart Items', value: '0', icon: faShoppingCart, color: styles.iconGreen },
+    { label: 'Cart Items', value: cart.length.toString(), icon: faShoppingCart, color: styles.iconGreen },
     { label: 'Wishlist', value: '0', icon: faHistory, color: styles.iconYellow },
-    { label: 'Total Spent', value: '$0.00', icon: faCreditCard, color: styles.iconPurple },
+    { label: 'Total Spent', value: `$${getCartTotal().toFixed(2)}`, icon: faCreditCard, color: styles.iconPurple },
   ];
 
   return (
@@ -99,6 +101,10 @@ const UserDashboard = () => {
                     <span>Email</span>
                     <span>{user?.email}</span>
                   </div>
+                  <div className={styles.infoItem}>
+                    <span>Cart Items</span>
+                    <span>{cart.length} items</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -129,16 +135,31 @@ const UserDashboard = () => {
             {activeTab === 'cart' && (
               <div className={styles.tabSection}>
                 <h3>Shopping Cart</h3>
-                <div className={styles.emptyState}>
-                  <FontAwesomeIcon icon={faShoppingCart} className={styles.emptyIcon} />
-                  <p className={styles.emptyText}>Your cart is empty</p>
-                  <button
-                    onClick={() => navigate('/products')}
-                    className={styles.actionButton}
-                  >
-                    Browse Products
-                  </button>
-                </div>
+                {cart.length === 0 ? (
+                  <div className={styles.emptyState}>
+                    <FontAwesomeIcon icon={faShoppingCart} className={styles.emptyIcon} />
+                    <p className={styles.emptyText}>Your cart is empty</p>
+                    <button
+                      onClick={() => navigate('/products')}
+                      className={styles.actionButton}
+                    >
+                      Browse Products
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.cartItems}>
+                    {cart.map(item => (
+                      <div key={item.product_id} className={styles.cartItem}>
+                        <img src={item.image} alt={item.name} className={styles.itemImage} />
+                        <div className={styles.itemInfo}>
+                          <h4>{item.name}</h4>
+                          <p>Quantity: {item.quantity}</p>
+                          <p>Price: ${(item.price * item.quantity).toFixed(2)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

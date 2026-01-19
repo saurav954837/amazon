@@ -18,23 +18,204 @@ export const ProductProvider = ({ children }) => {
   const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [cartLoading, setCartLoading] = useState(false);
 
-  // Fetch all products
+  const API_BASE = 'http://localhost:8000/api';
+
+  const fetchCartFromServer = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+      setCart(localCart);
+      return;
+    }
+
+    try {
+      setCartLoading(true);
+      const response = await axios.get(`${API_BASE}/cart/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      if (response.data && Array.isArray(response.data)) {
+        setCart(response.data);
+        localStorage.setItem('guestCart', JSON.stringify(response.data));
+      }
+    } catch (err) {
+      console.error('Failed to fetch cart:', err);
+      const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+      setCart(localCart);
+    } finally {
+      setCartLoading(false);
+    }
+  }, []);
+
+  const syncCartToServer = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+      if (localCart.length === 0) return;
+
+      await axios.post(`${API_BASE}/cart/sync`, localCart, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      localStorage.removeItem('guestCart');
+    } catch (err) {
+      console.error('Failed to sync cart:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCartFromServer();
+  }, [fetchCartFromServer]);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      syncCartToServer();
+    }
+  }, [syncCartToServer]);
+
+  const saveCartToStorage = (newCart) => {
+    setCart(newCart);
+    localStorage.setItem('guestCart', JSON.stringify(newCart));
+  };
+
+  const addToCart = async (product, quantity = 1) => {
+    const existingItemIndex = cart.findIndex(item => item.product_id === product.product_id);
+    let newCart;
+
+    if (existingItemIndex >= 0) {
+      newCart = [...cart];
+      newCart[existingItemIndex].quantity += quantity;
+    } else {
+      const cartItem = {
+        product_id: product.product_id,
+        name: product.product_name,
+        price: product.product_price,
+        image: product.product_image,
+        quantity: quantity,
+        added_at: new Date().toISOString()
+      };
+      newCart = [...cart, cartItem];
+    }
+
+    saveCartToStorage(newCart);
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await axios.post(`${API_BASE}/cart/`, {
+          product_id: product.product_id,
+          quantity: quantity
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to sync cart to server:', err);
+      }
+    }
+
+    return newCart;
+  };
+
+  const removeFromCart = async (productId) => {
+    const newCart = cart.filter(item => item.product_id !== productId);
+    saveCartToStorage(newCart);
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await axios.delete(`${API_BASE}/cart/${productId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } catch (err) {
+        console.error('Failed to remove from server cart:', err);
+      }
+    }
+  };
+
+  const updateCartQuantity = async (productId, newQuantity) => {
+    if (newQuantity < 1) {
+      removeFromCart(productId);
+      return;
+    }
+
+    const newCart = cart.map(item => 
+      item.product_id === productId 
+        ? { ...item, quantity: newQuantity }
+        : item
+    );
+    
+    saveCartToStorage(newCart);
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await axios.put(`${API_BASE}/cart/${productId}`, {
+          quantity: newQuantity
+        }, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (err) {
+        console.error('Failed to update quantity on server:', err);
+      }
+    }
+  };
+
+  const clearCart = async () => {
+    saveCartToStorage([]);
+    
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await axios.delete(`${API_BASE}/cart/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      } catch (err) {
+        console.error('Failed to clear server cart:', err);
+      }
+    }
+  };
+
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getCartCount = () => {
+    return cart.reduce((count, item) => count + item.quantity, 0);
+  };
+
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Fetching products from: http://localhost:8000/api/products/');
-      
-      const response = await axios.get('http://localhost:8000/api/products/', {
+      const response = await axios.get(`${API_BASE}/products/`, {
         timeout: 5000,
         headers: {
           'Accept': 'application/json',
         }
       });
-      
-      console.log('✅ API Response:', response.data);
       
       let productsData = [];
       
@@ -55,8 +236,6 @@ export const ProductProvider = ({ children }) => {
         }
       }
       
-      console.log('📦 Products extracted:', productsData.length);
-      
       if (productsData.length > 0) {
         setProducts(productsData);
         const formatProduct = (product) => ({
@@ -76,24 +255,11 @@ export const ProductProvider = ({ children }) => {
         setFeaturedProducts(formattedProducts.slice(0, 4));
         setDeals(formattedProducts.slice(4, 8));
         setRecommended(formattedProducts.slice(8, 12));
-        
-        console.log('🎯 Product distribution complete');
       } else {
-        console.log('⚠️ No products found, using mock data');
         createMockData();
       }
       
     } catch (err) {
-      console.error('❌ API Error Details:', {
-        message: err.message,
-        code: err.code,
-        response: err.response?.data,
-        status: err.response?.status,
-        config: err.config?.url
-      });
-      
-      // Network error or server down - use mock data
-      console.log('🔄 Falling back to mock data');
       createMockData();
       setError('Using demo data - API connection failed');
     } finally {
@@ -101,7 +267,6 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
-  // Function to create mock data
   const createMockData = () => {
     const mockProducts = Array.from({ length: 12 }, (_, i) => ({
       product_id: i + 1,
@@ -132,7 +297,16 @@ export const ProductProvider = ({ children }) => {
     recommended,
     loading,
     error,
-    refetch: fetchProducts
+    cart,
+    cartLoading,
+    addToCart,
+    removeFromCart,
+    updateCartQuantity,
+    clearCart,
+    getCartTotal,
+    getCartCount,
+    refetch: fetchProducts,
+    fetchCart: fetchCartFromServer
   };
 
   return (

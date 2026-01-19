@@ -13,7 +13,7 @@ export const cartController = {
             };
 
             await Cart.create(cartItem);
-            
+
             const cart = await Cart.readByUserId(user_id);
             const summary = await Cart.getCartSummary(user_id);
 
@@ -27,7 +27,7 @@ export const cartController = {
             });
         } catch (error) {
             console.error(`Add to cart error: ${error.message}`);
-            
+
             if (error.message.includes('foreign key constraint')) {
                 return res.status(404).json({
                     message: "Product not found",
@@ -45,7 +45,7 @@ export const cartController = {
     getCart: async (req, res) => {
         try {
             const user_id = req.user.user_id;
-            
+
             const cart = await Cart.readByUserId(user_id);
             const summary = await Cart.getCartSummary(user_id);
 
@@ -72,7 +72,7 @@ export const cartController = {
             const { quantity } = req.body;
 
             const cartItem = await Cart.readByCartId(cart_id);
-            
+
             if (!cartItem) {
                 return res.status(404).json({
                     message: "Cart item not found",
@@ -88,7 +88,7 @@ export const cartController = {
             }
 
             const affectedRows = await Cart.updateQuantity(cart_id, parseInt(quantity));
-            
+
             if (affectedRows === 0) {
                 return res.status(404).json({
                     message: "Cart item not found",
@@ -121,7 +121,7 @@ export const cartController = {
             const { cart_id } = req.params;
 
             const cartItem = await Cart.readByCartId(cart_id);
-            
+
             if (!cartItem) {
                 return res.status(404).json({
                     message: "Cart item not found",
@@ -137,7 +137,7 @@ export const cartController = {
             }
 
             const affectedRows = await Cart.delete(cart_id);
-            
+
             if (affectedRows === 0) {
                 return res.status(404).json({
                     message: "Cart item not found",
@@ -168,9 +168,9 @@ export const cartController = {
     clearCart: async (req, res) => {
         try {
             const user_id = req.user.user_id;
-            
+
             const affectedRows = await Cart.deleteByUserId(user_id);
-            
+
             res.json({
                 message: "Cart cleared successfully",
                 success: true,
@@ -196,7 +196,7 @@ export const cartController = {
     getCartSummary: async (req, res) => {
         try {
             const user_id = req.user.user_id;
-            
+
             const summary = await Cart.getCartSummary(user_id);
 
             res.json({
@@ -211,5 +211,28 @@ export const cartController = {
                 success: false
             });
         }
+    },
+
+    syncCart: async (req, res) => {
+        try {
+            const { cartItems } = req.body;
+            const userId = req.user.id;
+
+            await Cart.destroy({ where: { user_id: userId } });
+
+            const cartPromises = cartItems.map(item =>
+                Cart.create({
+                    user_id: userId,
+                    product_id: item.product_id,
+                    quantity: item.quantity
+                })
+            );
+
+            await Promise.all(cartPromises);
+
+            res.json({ success: true, message: 'Cart synced successfully' });
+        } catch (error) {
+            res.status(500).json({ error: 'Failed to sync cart' });
+        };
     }
 };

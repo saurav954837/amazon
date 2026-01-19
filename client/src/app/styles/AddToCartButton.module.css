@@ -1,0 +1,205 @@
+.defaultButton {
+  width: 100%;
+  padding: 10px 16px;
+  background-color: #ffd814;
+  color: #0F1111;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.defaultButton:hover:not(:disabled) {
+  background-color: #f7ca00;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.defaultButton:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.defaultButton.inCart {
+  background-color: #FFA41C;
+  color: white;
+}
+
+.defaultButton.inCart:hover:not(:disabled) {
+  background-color: #fa8900;
+}
+
+.defaultButton.added {
+  background-color: #2E8B57;
+  color: white;
+}
+
+.defaultButton.added:hover:not(:disabled) {
+  background-color: #26734a;
+}
+
+.defaultButton.disabled {
+  background-color: #E2E8F0;
+  color: #94A3B8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.defaultButton.disabled:hover {
+  background-color: #E2E8F0;
+  transform: none;
+  box-shadow: none;
+}
+
+.largeButton {
+  width: 100%;
+  padding: 14px 20px;
+  background-color: #ffd814;
+  color: #0F1111;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.largeButton:hover:not(:disabled) {
+  background-color: #f7ca00;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+.largeButton.inCart {
+  background-color: #FFA41C;
+  color: white;
+}
+
+.largeButton.added {
+  background-color: #2E8B57;
+  color: white;
+}
+
+.smallButton {
+  padding: 6px 12px;
+  background-color: #ffd814;
+  color: #0F1111;
+  border: none;
+  border-radius: 16px;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.smallButton:hover:not(:disabled) {
+  background-color: #f7ca00;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.smallButton.inCart {
+  background-color: #FFA41C;
+  color: white;
+}
+
+.smallButton.added {
+  background-color: #2E8B57;
+  color: white;
+}
+
+.cartIcon {
+  font-size: 14px;
+}
+
+.checkIcon {
+  font-size: 14px;
+  animation: checkPop 0.3s ease;
+}
+
+.spinnerIcon {
+  font-size: 14px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes checkPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Cart quantity badge */
+.cartQuantityBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #FF5F00;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Container for positioning */
+.buttonContainer {
+  position: relative;
+  display: inline-block;
+}
+
+/* Accessibility focus styles */
+.defaultButton:focus-visible,
+.largeButton:focus-visible,
+.smallButton:focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .defaultButton {
+    padding: 8px 12px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+  
+  .largeButton {
+    padding: 12px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+}

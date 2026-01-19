@@ -31,6 +31,7 @@ const RegisterPage = lazy(() => import('./app/components/auth/RegisterPage.jsx')
 const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.jsx'));
 const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
 const UnauthorizedPage = lazy(() => import('./app/components/UnauthorizedPage.jsx'));
+const CartSidebar = lazy(() => import('./app/components/CartSidebar.jsx'));
 
 // Data loaders for route preloading
 import { productLoader, homepageLoader, searchLoader } from './app/utils/dataLoader.js';
@@ -90,14 +91,7 @@ const router = createBrowserRouter(
             </Suspense>
           }
         />
-        <Route
-          path="profile"
-          element={
-            <Suspense fallback={<Loader />}>
-              <div>User Profile</div>
-            </Suspense>
-          }
-        />
+        
         <Route
           path="orders"
           element={
@@ -106,11 +100,12 @@ const router = createBrowserRouter(
             </Suspense>
           }
         />
+
         <Route
           path="cart"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Cart</div>
+              <CartSidebar />
             </Suspense>
           }
         />

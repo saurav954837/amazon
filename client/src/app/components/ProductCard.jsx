@@ -2,10 +2,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruck } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import { useNavigate } from 'react-router-dom';
+import AddToCartButton from './AddToCartButton.jsx';
 import styles from '../styles/ProductCard.module.css';
 
 const ProductCard = ({ product }) => {
-  // Add a safety check at the beginning
   if (!product) {
     return (
       <div className={styles.productCard}>
@@ -21,10 +21,9 @@ const ProductCard = ({ product }) => {
     );
   }
 
-  const { addToCart } = useProduct()
+  const { cart } = useProduct()
   const navigate = useNavigate()
 
-  // Safe property access with fallbacks
   const getProductId = () => {
     return product.product_id || product.id || product._id || null;
   }
@@ -57,6 +56,15 @@ const ProductCard = ({ product }) => {
     return product.product_quantity || product.quantity || 0;
   }
 
+  const isProductInCart = () => {
+    return cart.some(item => item.product_id === getProductId())
+  }
+
+  const getCartItemQuantity = () => {
+    const cartItem = cart.find(item => item.product_id === getProductId())
+    return cartItem ? cartItem.quantity : 0
+  }
+
   const formatPrice = (price) => {
     const safePrice = Number(price) || 0;
     return new Intl.NumberFormat('en-EG', {
@@ -79,35 +87,20 @@ const ProductCard = ({ product }) => {
 
   const discount = calculateDiscount()
   const productId = getProductId();
+  const isInCart = isProductInCart()
+  const cartItemQuantity = getCartItemQuantity()
 
-  const handleAddToCart = async (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    const result = await addToCart(product)
-    if (!result.success) {
-      // If not authenticated, it will redirect to register page
-      return
+  const handleCardClick = (e) => {
+    if (e.target.closest('button')) return
+    if (productId) {
+      navigate(`/products/${productId}`)
     }
-    // Show success message or update UI
   }
 
   const handleBuyNow = async (e) => {
     e.preventDefault()
     e.stopPropagation()
     
-    const result = await addToCart(product)
-    if (!result.success) {
-      // If not authenticated, it will redirect to register page
-      return
-    }
-    
-    // Navigate to cart if authenticated
-    navigate('/cart')
-  }
-
-  const handleCardClick = (e) => {
-    if (e.target.closest('button')) return
     if (productId) {
       navigate(`/products/${productId}`)
     }
@@ -127,6 +120,12 @@ const ProductCard = ({ product }) => {
         />
         {discount > 0 && (
           <span className={styles.discountBadge}>-{discount}%</span>
+        )}
+        {product.isPrime && (
+          <div className={styles.primeBadge}>
+            <FontAwesomeIcon icon={faTruck} className={styles.primeIcon} />
+            <span>Prime</span>
+          </div>
         )}
       </div>
       
@@ -153,6 +152,15 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
+        {isInCart && (
+          <div className={styles.cartIndicator}>
+            <span className={styles.cartItemCount}>In Cart: {cartItemQuantity}</span>
+            <span className={styles.cartItemTotal}>
+              {formatPrice(getProductPrice() * cartItemQuantity)}
+            </span>
+          </div>
+        )}
+        
         <div className={styles.priceContainer}>
           <span className={styles.currentPrice}>
             {formatPrice(getProductPrice())}
@@ -161,13 +169,6 @@ const ProductCard = ({ product }) => {
             <span className={styles.originalPrice}>{formatPrice(getOriginalPrice())}</span>
           )}
         </div>
-        
-        {product.isPrime && (
-          <div className={styles.primeBadge}>
-            <FontAwesomeIcon icon={faTruck} className={styles.primeIcon} />
-            <span>Prime</span>
-          </div>
-        )}
         
         <div className={styles.productStatus}>
           <span className={`${styles.statusBadge} ${
@@ -178,21 +179,16 @@ const ProductCard = ({ product }) => {
         </div>
         
         <div className={styles.productActions}>
-          <button 
-            className={styles.addToCartBtn}
-            onClick={handleAddToCart}
-            aria-label={`Add ${getProductName()} to cart`}
-            disabled={getProductStock() <= 0}
-          >
-            Add to Cart
-          </button>
+          <div className={styles.addToCartWrapper}>
+            <AddToCartButton product={product} />
+          </div>
           <button 
             className={styles.buyNowBtn}
             onClick={handleBuyNow}
             aria-label={`Buy ${getProductName()} now`}
             disabled={getProductStock() <= 0}
           >
-            Buy Now
+            {isInCart ? 'View Details' : 'Buy Now'}
           </button>
         </div>
       </div>

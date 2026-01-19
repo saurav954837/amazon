@@ -16,6 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import styles from '../styles/Header.module.css';
 import { useAuth } from '../hooks/authHook.js';
+import { useProduct } from '../context/ProductContext.jsx';
 import amazon_logo from "../../assets/amazon-header.png";
 
 const securityUtils = {
@@ -109,7 +110,6 @@ const securityUtils = {
   }
 };
 
-// Enhanced rate limiting with memory
 const createRateLimiter = (limit = 5, interval = 10000) => {
   const attempts = new Map();
   return {
@@ -137,6 +137,7 @@ const Header = ({ onCartClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [securityError, setSecurityError] = useState('');
   const { user, logout, isAdmin } = useAuth();
+  const { cart, getCartCount } = useProduct();
   const navigate = useNavigate();
 
   const dropdownRef = useRef(null);
@@ -145,6 +146,8 @@ const Header = ({ onCartClick }) => {
 
   const navigationRateLimiter = useRef(createRateLimiter(15, 60000));
   const searchRateLimiter = useRef(createRateLimiter(8, 15000));
+  const cartCount = getCartCount();
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -161,13 +164,13 @@ const Header = ({ onCartClick }) => {
     };
   }, []);
 
-  // Clear security errors
   useEffect(() => {
     if (securityError) {
       const timer = setTimeout(() => setSecurityError(''), 4000);
       return () => clearTimeout(timer);
     }
   }, [securityError]);
+
   const secureNavigate = useCallback((path, options = {}) => {
     if (!securityUtils.validatePath(path)) {
       console.warn('Security: Invalid navigation path detected:', path);
@@ -244,6 +247,14 @@ const Header = ({ onCartClick }) => {
     }
   };
 
+  const handleCartClick = () => {
+    if (onCartClick) {
+      onCartClick();
+    } else {
+      secureNavigate('/cart');
+    }
+  };
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -255,13 +266,11 @@ const Header = ({ onCartClick }) => {
     }
   };
 
-  // Handle mobile menu toggle
   const toggleMobileMenu = () => {
     setShowMobileMenu(!showMobileMenu);
     setShowUserDropdown(false);
   };
 
-  // Focus search on mobile
   const focusSearch = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus();
@@ -270,7 +279,6 @@ const Header = ({ onCartClick }) => {
 
   return (
     <header className={styles.header}>
-      {/* Security Alert */}
       {securityError && (
         <div className={styles.securityAlert} role="alert" aria-live="assertive">
           <span className={styles.alertIcon}>⚠️</span>
@@ -285,11 +293,9 @@ const Header = ({ onCartClick }) => {
         </div>
       )}
 
-      {/* Top Bar */}
       <div className={styles.topBar}>
         <div className={styles.container}>
           <div className={styles.topBarContent}>
-            {/* Mobile Menu Button */}
             <button
               className={styles.mobileMenuButton}
               onClick={toggleMobileMenu}
@@ -299,7 +305,6 @@ const Header = ({ onCartClick }) => {
               <FontAwesomeIcon icon={faBars} />
             </button>
 
-            {/* Logo Section */}
             <div className={styles.logoSection}>
               <Link
                 to="/"
@@ -322,7 +327,6 @@ const Header = ({ onCartClick }) => {
                 />
               </Link>
 
-              {/* Delivery Info - Desktop */}
               <div className={styles.deliveryInfo}>
                 <FontAwesomeIcon
                   icon={faMapMarkerAlt}
@@ -336,7 +340,6 @@ const Header = ({ onCartClick }) => {
               </div>
             </div>
 
-            {/* Search Section */}
             <div className={styles.searchSection}>
               <form
                 onSubmit={handleSearchSubmit}
@@ -369,9 +372,7 @@ const Header = ({ onCartClick }) => {
               </div>
             </div>
 
-            {/* User Section */}
             <div className={styles.userSection}>
-              {/* User Menu */}
               <div className={styles.userMenuContainer} ref={dropdownRef}>
                 {user ? (
                   <div className={styles.userMenu}>
@@ -384,7 +385,7 @@ const Header = ({ onCartClick }) => {
                     >
                       <div className={styles.accountInfo}>
                         <span className={styles.hello}>
-                          Hello, {securityUtils.sanitizeInput(user.firstName) || 'User'}
+                          Hello, {securityUtils.sanitizeInput(user.first_name) || 'User'}
                         </span>
                         <span className={styles.accountText}>Account & Lists</span>
                       </div>
@@ -409,7 +410,7 @@ const Header = ({ onCartClick }) => {
                           />
                           <div>
                             <strong>
-                              {securityUtils.sanitizeInput(user.firstName)} {securityUtils.sanitizeInput(user.lastName)}
+                              {securityUtils.sanitizeInput(user.first_name)} {securityUtils.sanitizeInput(user.last_name)}
                             </strong>
                             <span>{securityUtils.sanitizeInput(user.email)}</span>
                           </div>
@@ -476,7 +477,6 @@ const Header = ({ onCartClick }) => {
                 )}
               </div>
 
-              {/* Orders - Desktop */}
               <div
                 className={styles.orders}
                 onClick={handleOrdersClick}
@@ -489,20 +489,19 @@ const Header = ({ onCartClick }) => {
                 <span className={styles.ordersText}>& Orders</span>
               </div>
 
-              {/* Cart */}
               <div
                 className={styles.cart}
-                onClick={() => {
-                  if (onCartClick) onCartClick();
-                }}
+                onClick={handleCartClick}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && onCartClick && onCartClick()}
+                onKeyDown={(e) => e.key === 'Enter' && handleCartClick()}
                 aria-label="Shopping cart"
               >
                 <div className={styles.cartIconWrapper}>
                   <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
-                  <span className={styles.cartCount}>0</span>
+                  {cartCount > 0 && (
+                    <span className={styles.cartCount}>{cartCount}</span>
+                  )}
                 </div>
                 <span className={styles.cartText}>Cart</span>
               </div>
@@ -511,11 +510,9 @@ const Header = ({ onCartClick }) => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {showMobileMenu && (
         <div className={styles.mobileMenu} ref={mobileMenuRef}>
           <div className={styles.mobileMenuContent}>
-            {/* Mobile Delivery Info */}
             <div className={styles.mobileDeliveryInfo}>
               <FontAwesomeIcon icon={faMapMarkerAlt} />
               <div>
@@ -523,7 +520,6 @@ const Header = ({ onCartClick }) => {
               </div>
             </div>
 
-            {/* Mobile Search Trigger */}
             <button
               className={styles.mobileSearchTrigger}
               onClick={focusSearch}
@@ -533,7 +529,6 @@ const Header = ({ onCartClick }) => {
               <span>Search Amazon</span>
             </button>
 
-            {/* Mobile Navigation */}
             <nav className={styles.mobileNav}>
               {user ? (
                 <>
