@@ -33,11 +33,10 @@ export const Cart = {
                     c.quantity,
                     c.created_at,
                     c.updated_at,
-                    p.name as product_name,
-                    p.price,
-                    p.stock,
-                    p.image_url,
-                    (p.price * c.quantity) as subtotal
+                    p.product_name,
+                    p.product_price,
+                    p.product_image,
+                    (p.product_price * c.quantity) as subtotal
                 FROM cart c
                 JOIN products p ON c.product_id = p.product_id
                 WHERE c.user_id = ?
@@ -57,9 +56,8 @@ export const Cart = {
             const stmt = `
                 SELECT 
                     c.*,
-                    p.name as product_name,
-                    p.price,
-                    p.stock
+                    p.product_name as product_name,
+                    p.product_price,
                 FROM cart c
                 JOIN products p ON c.product_id = p.product_id
                 WHERE c.cart_id = ?
@@ -132,7 +130,7 @@ export const Cart = {
                 SELECT 
                     COUNT(*) as total_items,
                     SUM(c.quantity) as total_quantity,
-                    SUM(p.price * c.quantity) as total_price
+                    SUM(p.product_price * c.quantity) as total_price
                 FROM cart c
                 JOIN products p ON c.product_id = p.product_id
                 WHERE c.user_id = ?

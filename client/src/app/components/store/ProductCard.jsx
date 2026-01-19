@@ -1,10 +1,10 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruck, faEdit } from '@fortawesome/free-solid-svg-icons';
-import { useProduct } from '../context/ProductContext.jsx';
+import { useProduct } from '../../context/ProductContext.jsx';
 import { useNavigate } from 'react-router-dom';
-import AddToCartButton from './AddToCartButton.jsx';
-import { useAuth } from '../hooks/authHook.js';
-import styles from '../styles/ProductCard.module.css';
+import AddToCartButton from '../AddToCartButton.jsx';
+import { useAuth } from '../../hooks/authHook.js';
+import styles from '../../styles/ProductCard.module.css';
 
 const ProductCard = ({ product }) => {
   const { user } = useAuth();

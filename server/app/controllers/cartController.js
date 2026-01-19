@@ -215,24 +215,37 @@ export const cartController = {
 
     syncCart: async (req, res) => {
         try {
-            const { cartItems } = req.body;
-            const userId = req.user.id;
+            const cartItems = req.body;
+            const userId = req.user.user_id;
+            await Cart.deleteByUserId(userId);
+            if (!Array.isArray(cartItems)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cart items must be an array'
+                });
+            }
 
-            await Cart.destroy({ where: { user_id: userId } });
+            if (cartItems.length > 0) {
+                const cartPromises = cartItems.map(item =>
+                    Cart.create({
+                        user_id: userId,
+                        product_id: item.product_id,
+                        quantity: item.quantity || 1
+                    })
+                );
 
-            const cartPromises = cartItems.map(item =>
-                Cart.create({
-                    user_id: userId,
-                    product_id: item.product_id,
-                    quantity: item.quantity
-                })
-            );
-
-            await Promise.all(cartPromises);
-
-            res.json({ success: true, message: 'Cart synced successfully' });
+                await Promise.all(cartPromises);
+            }
+            res.json({
+                success: true,
+                message: 'Cart synced successfully'
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Failed to sync cart' });
-        };
+            console.error('Sync cart error:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to sync cart'
+            });
+        }
     }
 };

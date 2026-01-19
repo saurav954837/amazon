@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import Header from '../components/Header.jsx';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
-import CartSidebar from '../components/CartSidebar.jsx';
+import CartSidebar from '../components/store/CartSidebar.jsx';
 import { useAuth } from '../hooks/authHook.js';
 import styles from '../styles/MainLayout.module.css';
 

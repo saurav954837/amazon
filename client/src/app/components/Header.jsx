@@ -7,7 +7,6 @@ import {
   faUser,
   faMapMarkerAlt,
   faBars,
-  faGlobe,
   faChevronDown,
   faSignOutAlt,
   faUserCircle,

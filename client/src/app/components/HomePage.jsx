@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, memo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProductCard from './ProductCard.jsx';
+import ProductCard from './store/ProductCard.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import CategoriesGrid from '../components/store/CategoriesGrid.jsx';
 import {
   faChevronLeft,
   faChevronRight,
@@ -397,32 +398,7 @@ const Homepage = () => {
 
         {/* Categories Section */}
         <section className={styles.categoriesSection} aria-labelledby="shop-categories">
-          <h2 id="shop-categories" className={styles.sectionTitle}>Shop by Category</h2>
-          <div className={styles.categoriesGrid}>
-            {[
-              { name: 'Electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=300&q=80' },
-              { name: 'Home & Kitchen', image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?auto=format&fit=crop&w=300&q=80' },
-              { name: 'Fashion', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=300&q=80' },
-              { name: 'Beauty & Personal Care', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
-              { name: 'Sports & Outdoors', image: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=300&q=80' },
-            ].map((category, index) => (
-              <a
-                key={index}
-                className={styles.categoryCard}
-                aria-label={`Browse ${category.name}`}
-              >
-                <div className={styles.categoryImageWrapper}>
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className={styles.categoryImage}
-                    loading="lazy"
-                  />
-                </div>
-                <h3 className={styles.categoryName}>{category.name}</h3>
-              </a>
-            ))}
-          </div>
+          <CategoriesGrid />
         </section>
       </div>
     </div>

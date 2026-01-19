@@ -36,8 +36,9 @@ const UnauthorizedPage = lazy(() => import('./app/components/UnauthorizedPage.js
 
 // User Lazy Loaded Components
 const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.jsx'));
-const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'));
-const CartSidebar = lazy(() => import('./app/components/CartSidebar.jsx'));
+const ProductPage = lazy(() => import('./app/components/store/ProductPage.jsx'));
+const CategorizedProducts = lazy(() => import('./app/components/store/CategorizedProducts.jsx'));
+const CartSidebar = lazy(() => import('./app/components/store/CartSidebar.jsx'));
 
 // Admin Lazy Loaded Components
 const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
@@ -186,13 +187,12 @@ const router = createBrowserRouter(
       </Route>
 
       <Route
-        path="category/:category"
+        path="category/:categoryName"
         element={
           <Suspense fallback={<Loader />}>
-            <Homepage />
+            <CategorizedProducts />
           </Suspense>
         }
-        loader={({ params }) => searchLoader(params.category)}
       />
 
       <Route
@@ -254,7 +254,7 @@ const App = () => {
       if (link) {
         const href = link.getAttribute('href');
         if (href === '/products') {
-          import('./app/components/ProductPage.jsx');
+          import('./app/components/store/ProductPage.jsx');
         } else if (href === '/dashboard') {
           import('./app/components/guard/UserDashboard.jsx');
         } else if (href === '/admin-dashboard') {

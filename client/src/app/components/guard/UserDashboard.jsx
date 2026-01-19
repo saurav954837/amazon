@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/authHook.js';
 import { useProduct } from '../../context/ProductContext.jsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faShoppingCart, faBox, faCreditCard, faHistory } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faShoppingCart, faBox, faCreditCard, faHistory, faTrash } from '@fortawesome/free-solid-svg-icons';
 import styles from '../../styles/UserDashboard.module.css';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
-  const { cart, getCartTotal } = useProduct();
+  const { cart, getCartTotal, removeFromCart } = useProduct();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -23,6 +23,14 @@ const UserDashboard = () => {
     { label: 'Wishlist', value: '0', icon: faHistory, color: styles.iconYellow },
     { label: 'Total Spent', value: `$${getCartTotal().toFixed(2)}`, icon: faCreditCard, color: styles.iconPurple },
   ];
+
+  const handleRemoveItem = (productId) => {
+    removeFromCart(productId);
+  };
+
+  const handleViewProduct = (productId) => {
+    navigate(`/products/${productId}`);
+  };
 
   return (
     <div className={styles.dashboardContainer}>
@@ -134,7 +142,7 @@ const UserDashboard = () => {
 
             {activeTab === 'cart' && (
               <div className={styles.tabSection}>
-                <h3>Shopping Cart</h3>
+                <h3>Shopping Cart ({cart.length} items)</h3>
                 {cart.length === 0 ? (
                   <div className={styles.emptyState}>
                     <FontAwesomeIcon icon={faShoppingCart} className={styles.emptyIcon} />
@@ -147,17 +155,78 @@ const UserDashboard = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className={styles.cartItems}>
-                    {cart.map(item => (
-                      <div key={item.product_id} className={styles.cartItem}>
-                        <img src={item.image} alt={item.name} className={styles.itemImage} />
-                        <div className={styles.itemInfo}>
-                          <h4>{item.name}</h4>
-                          <p>Quantity: {item.quantity}</p>
-                          <p>Price: ${(item.price * item.quantity).toFixed(2)}</p>
+                  <div className={styles.cartContainer}>
+                    <div className={styles.cartItems}>
+                      {cart.map(item => (
+                        <div key={item.product_id} className={styles.cartItem}>
+                          <div className={styles.itemImageContainer}>
+                            <img 
+                              src={item.image} 
+                              alt={item.name} 
+                              className={styles.itemImage}
+                              onError={(e) => {
+                                e.target.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80';
+                              }}
+                            />
+                          </div>
+                          <div className={styles.itemInfo}>
+                            <h4 
+                              className={styles.itemTitle}
+                              onClick={() => handleViewProduct(item.product_id)}
+                            >
+                              {item.name}
+                            </h4>
+                            <div className={styles.itemDetails}>
+                              <span className={styles.itemQuantity}>Quantity: {item.quantity}</span>
+                              <span className={styles.itemPrice}>Price: ${(item.price * item.quantity).toFixed(2)}</span>
+                            </div>
+                            <div className={styles.itemActions}>
+                              <button 
+                                className={styles.viewBtn}
+                                onClick={() => handleViewProduct(item.product_id)}
+                              >
+                                View Product
+                              </button>
+                              <button 
+                                className={styles.removeBtn}
+                                onClick={() => handleRemoveItem(item.product_id)}
+                              >
+                                <FontAwesomeIcon icon={faTrash} />
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className={styles.cartSummary}>
+                      <h4>Cart Summary</h4>
+                      <div className={styles.summaryDetails}>
+                        <div className={styles.summaryRow}>
+                          <span>Subtotal ({cart.length} items)</span>
+                          <span>${getCartTotal().toFixed(2)}</span>
+                        </div>
+                        <div className={styles.summaryRow}>
+                          <span>Shipping</span>
+                          <span className={styles.freeShipping}>FREE</span>
+                        </div>
+                        <div className={styles.summaryRow}>
+                          <span>Tax</span>
+                          <span>${(getCartTotal() * 0.08).toFixed(2)}</span>
+                        </div>
+                        <div className={styles.summaryDivider}></div>
+                        <div className={`${styles.summaryRow} ${styles.totalRow}`}>
+                          <span>Total</span>
+                          <span>${(getCartTotal() * 1.08).toFixed(2)}</span>
                         </div>
                       </div>
-                    ))}
+                      <button 
+                        className={styles.checkoutBtn}
+                        onClick={() => navigate('/cart')}
+                      >
+                        Proceed to Checkout
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

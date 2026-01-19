@@ -39,8 +39,8 @@ const ProductManagement = () => {
   const [formErrors, setFormErrors] = useState({});
 
   const categories = [
-    'Electronics', 'Clothing', 'Books', 'Home & Kitchen',
-    'Beauty', 'Sports', 'Toys', 'Automotive'
+    'Electronics', 'Clothing', 'Books', 'Home & Kitchen', "Mobile Phones",
+    'Beauty', 'Sports', 'Toys', 'Automotive', "Grocery"
   ];
 
   const validateField = (name, value) => {

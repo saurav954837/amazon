@@ -1,8 +1,8 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faTrash, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
-import { useProduct } from '../context/ProductContext.jsx';
-import styles from '../styles/CartSidebar.module.css';
+import { useProduct } from '../../context/ProductContext.jsx';
+import styles from '../../styles/CartSidebar.module.css';
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const { cart, removeFromCart, updateCartQuantity } = useProduct()

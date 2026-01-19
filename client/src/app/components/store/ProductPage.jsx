@@ -14,14 +14,18 @@ import {
   faStarHalfAlt,
   faCheck
 } from '@fortawesome/free-solid-svg-icons';
-import { useProduct } from '../context/ProductContext.jsx';
+import { useProduct } from '../../context/ProductContext.jsx';
 import axios from 'axios';
 import ProductCard from './ProductCard.jsx';
-import styles from '../styles/ProductPage.module.css';
+import styles from '../../styles/ProductPage.module.css';
+import { useAuth } from "../../hooks/authHook.js";
 
 const ProductPage = () => {
   const params = useParams();
   const product_id = params?.product_id;
+
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   
   const navigate = useNavigate()
   const { products, cart, addToCart, updateCartQuantity } = useProduct()
