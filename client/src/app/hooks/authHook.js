@@ -4,13 +4,14 @@ import { useNavigate, useLocation } from 'react-router-dom'
 
 const AuthContext = createContext(null);
 
+const API_BASE = 'http://localhost:8000/api';
+
 const authApi = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: API_BASE,
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, // IMPORTANT: This allows cookies to be sent
 });
 
 authApi.interceptors.request.use(
@@ -33,27 +34,32 @@ authApi.interceptors.response.use(
             originalRequest._retry = true
 
             try {
-                // Try to refresh token using HTTP-only cookie
-                const response = await authApi.post('/auth/refresh-token')
-                
-                const { accessToken, refreshToken: newRefreshToken } = response.data.data
+                const refreshToken = localStorage.getItem('refreshToken')
 
-                localStorage.setItem('accessToken', accessToken)
-                if (newRefreshToken) {
-                    localStorage.setItem('refreshToken', newRefreshToken)
+                if (!refreshToken) {
+                    throw new Error('No refresh token')
                 }
 
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`
-                return authApi(originalRequest)
+                const response = await authApi.post('/auth/refresh-token', {
+                    refresh_token: refreshToken
+                })
+
+                if (response.data.success) {
+                    const { accessToken } = response.data.data
+
+                    localStorage.setItem('accessToken', accessToken)
+
+                    originalRequest.headers.Authorization = `Bearer ${accessToken}`
+                    return authApi(originalRequest)
+                }
             } catch (refreshError) {
-                // Clear everything on refresh failure
+                console.log('Refresh failed:', refreshError.message)
                 localStorage.removeItem('accessToken')
                 localStorage.removeItem('refreshToken')
                 localStorage.removeItem('user')
                 if (window.location.pathname !== '/login') {
                     window.location.href = '/login'
                 }
-                return Promise.reject(refreshError)
             }
         }
 
@@ -76,55 +82,31 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Initialize auth on mount
     const initAuth = useCallback(async () => {
         const token = localStorage.getItem('accessToken')
         const storedUser = localStorage.getItem('user')
 
         if (token && storedUser) {
             try {
-                // Verify token with backend
                 const response = await authApi.get('/auth/verify')
                 if (response.data.success) {
-                    setUser(JSON.parse(storedUser))
+                    const parsedUser = JSON.parse(storedUser)
+                    setUser(parsedUser)
                 } else {
-                    // Token invalid, try to refresh
-                    await refreshAuth()
+                    localStorage.removeItem('accessToken')
+                    localStorage.removeItem('refreshToken')
+                    localStorage.removeItem('user')
+                    setUser(null)
                 }
             } catch (err) {
-                console.log('Token verification failed, trying refresh...')
-                await refreshAuth()
+                console.log('Token verification failed')
+                localStorage.removeItem('accessToken')
+                localStorage.removeItem('refreshToken')
+                localStorage.removeItem('user')
+                setUser(null)
             }
         }
         setLoading(false)
-    }, [])
-
-    // Refresh authentication
-    const refreshAuth = useCallback(async () => {
-        try {
-            const response = await authApi.post('/auth/refresh-token')
-            if (response.data.success) {
-                const { accessToken, refreshToken } = response.data.data
-                const userResponse = await authApi.get('/auth/profile')
-                
-                localStorage.setItem('accessToken', accessToken)
-                if (refreshToken) {
-                    localStorage.setItem('refreshToken', refreshToken)
-                }
-                localStorage.setItem('user', JSON.stringify(userResponse.data.data.user))
-                
-                setUser(userResponse.data.data.user)
-                return true
-            }
-        } catch (err) {
-            console.log('Refresh failed:', err.message)
-            // Clear everything
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('user')
-            setUser(null)
-        }
-        return false
     }, [])
 
     useEffect(() => {
@@ -142,14 +124,13 @@ export const AuthProvider = ({ children }) => {
             });
 
             const { data: responseData } = response;
-            
+
             if (!responseData.success) {
                 throw new Error(responseData.message || 'Login failed')
             }
 
             const { accessToken, refreshToken, user: userData } = responseData.data;
-            
-            // Store tokens and user data
+
             localStorage.setItem('accessToken', accessToken)
             localStorage.setItem('refreshToken', refreshToken)
             localStorage.setItem('user', JSON.stringify(userData))
@@ -168,7 +149,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false)
         }
     }, [navigate, location]);
-    
+
     const register = useCallback(async (userData) => {
         setLoading(true)
         setError(null)
@@ -182,17 +163,17 @@ export const AuthProvider = ({ children }) => {
             })
 
             const { data: responseData } = response;
-            
+
             if (!responseData.success) {
                 throw new Error(responseData.message || 'Registration failed')
             }
 
             const { accessToken, refreshToken, user: registeredUser } = responseData.data;
-            
+
             localStorage.setItem('accessToken', accessToken)
             localStorage.setItem('refreshToken', refreshToken)
             localStorage.setItem('user', JSON.stringify(registeredUser))
-            
+
             setUser(registeredUser);
             navigate('/', { replace: true });
 
@@ -205,7 +186,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false)
         }
     }, [navigate])
-    
+
     const logout = useCallback(async () => {
         setLoading(true)
 
@@ -214,11 +195,10 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
             console.error('Logout API error:', err)
         } finally {
-            // Clear everything
             localStorage.removeItem('accessToken')
             localStorage.removeItem('refreshToken')
             localStorage.removeItem('user')
-            localStorage.removeItem('cart')
+            localStorage.removeItem('guestCart')
 
             setUser(null)
             setError(null)
@@ -265,7 +245,48 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, []);
+
+    const refreshAuth = useCallback(async () => {
+        try {
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            if (!refreshToken) {
+                throw new Error('No refresh token');
+            }
+
+            const response = await authApi.post('/auth/refresh-token', {
+                refresh_token: refreshToken
+            });
+
+            if (response.data.success) {
+                const { accessToken } = response.data.data;
+
+                localStorage.setItem('accessToken', accessToken);
+
+                const userResponse = await authApi.get('/auth/profile');
+
+                localStorage.setItem('user', JSON.stringify(userResponse.data.data.user));
+
+                setUser(userResponse.data.data.user);
+                return true;
+            }
+        } catch (err) {
+            console.log('Refresh failed:', err.message);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            setUser(null);
+        }
+        return false;
+    }, []);
+
+    const getDashboardPath = useCallback(() => {
+        if (user?.role === 'admin') {
+            return '/admin-dashboard';
+        }
+        return '/user-dashboard';
+    }, [user]);
 
     const isAuthenticated = !!user;
     const isAdmin = user?.role === 'admin';
@@ -281,7 +302,9 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         changePassword,
-        clearError: () => setError(null), 
+        refreshAuth,
+        getDashboardPath,
+        clearError: () => setError(null),
     };
 
     return React.createElement(
@@ -291,4 +314,5 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
+export { authApi };
 export default useAuth;

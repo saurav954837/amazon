@@ -115,16 +115,32 @@ export const productController = {
     destroy: async (req, res) => {
         try {
             const product_id = req.params.product_id;
-            const product = await Product.delete(product_id);
+            const product = await Product.readById(product_id);
+            if (!product) {
+                return res.status(404).json({
+                    message: "Product not found",
+                    success: false
+                });
+            };
+
+            const affectedRows = await Product.delete(product_id);
+
+            if (affectedRows === 0) {
+                return res.status(404).json({
+                    message: "Product not found",
+                    success: false
+                });
+            };
+
             res.status(200).json({
-                message: "Product Deleted Successfully.",
-                success: true,
-                data: product
+                message: "Product deleted successfully",
+                success: true
             });
+
         } catch (error) {
-            console.log(`Product delete error: ${error.message}`);
+            console.error(`Product delete failed: ${error.message}`);
             res.status(500).json({
-                message: "Failed to delete product.",
+                message: "Failed to delete product",
                 success: false
             });
         };

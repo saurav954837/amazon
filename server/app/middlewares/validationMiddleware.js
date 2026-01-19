@@ -2,30 +2,48 @@ import { validationResult } from "express-validator";
 
 export const validate = (validations) => {
     return async (req, res, next) => {
-        await Promise.all(validations.map(v => v.run(req)));
-        
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ 
-                errors: errors.array().map(e => ({ field: e.path, message: e.msg }))
+        try {
+            console.log('Request body:', req.body);
+            await Promise.all(validations.map(v => v.run(req)));
+            
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                console.log('Validation errors:', errors.array());
+                return res.status(400).json({ 
+                    message: "Validation failed",
+                    success: false,
+                    errors: errors.array().map(e => ({ field: e.path, message: e.msg }))
+                });
+            }
+            
+            console.log('Validation passed');
+            next();
+        } catch (error) {
+            console.error('Validation middleware error:', error);
+            res.status(500).json({
+                message: "Internal server error",
+                success: false
             });
         }
-        
-        next();
     };
 };
 
 export const sanitizeInput = (req, res, next) => {
-    if (req.body) {
-        Object.keys(req.body).forEach(key => {
-            if (typeof req.body[key] === 'string') {
-                if (key === 'product_name' || key === 'product_desc') {
-                    req.body[key] = req.body[key].replace(/^\s+|\s+$/g, '');
-                } else {
-                    req.body[key] = req.body[key].trim();
+    try {
+        if (req.body && typeof req.body === 'object') {
+            Object.keys(req.body).forEach(key => {
+                if (typeof req.body[key] === 'string') {
+                    if (req.body[key] === null || req.body[key] === undefined) {
+                        req.body[key] = '';
+                    } else {
+                        req.body[key] = req.body[key].trim();
+                    }
                 }
-            }
-        });
+            });
+        }
+        next();
+    } catch (error) {
+        console.error('Sanitization error:', error);
+        next();
     }
-    next();
 };

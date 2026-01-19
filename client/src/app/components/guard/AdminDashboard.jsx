@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/authHook.js';
+import { authApi } from '../../hooks/authHook.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUsers,
@@ -16,12 +17,52 @@ import styles from '../../styles/AdminDashboard.module.css';
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [stats] = useState({
+  const [stats, setStats] = useState({
     totalUsers: 0,
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboardStats();
+  }, []);
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+
+      const [usersResponse, productsResponse] = await Promise.all([
+        authApi.get('/admin/users'),
+        authApi.get('/products')
+      ]);
+
+      let totalOrders = 0;
+      let totalRevenue = 0;
+
+      setStats({
+        totalUsers: usersResponse.data.success ? (usersResponse.data.data?.length || 0) : 0,
+        totalProducts: productsResponse.data.success ? (productsResponse.data.data?.length || 0) : 0,
+        totalOrders: totalOrders,
+        totalRevenue: totalRevenue
+      });
+
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      
+      if (error.response?.status === 403) {
+        alert('Access denied. You need admin privileges.');
+        navigate('/dashboard');
+      } else if (error.response?.status === 401) {
+        alert('Session expired. Please login again.');
+        logout();
+        navigate('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -50,27 +91,6 @@ const AdminDashboard = () => {
       color: styles.iconYellow,
       path: '/admin/orders',
     },
-    {
-      title: 'Analytics',
-      description: 'View sales and traffic reports',
-      icon: faChartLine,
-      color: styles.iconPurple,
-      path: '/admin/analytics',
-    },
-    {
-      title: 'System Settings',
-      description: 'Configure platform settings',
-      icon: faCog,
-      color: styles.iconGray,
-      path: '/admin/settings',
-    },
-    {
-      title: 'Revenue',
-      description: 'Financial reports and insights',
-      icon: faDollarSign,
-      color: styles.iconEmerald,
-      path: '/admin/revenue',
-    },
   ];
 
   return (
@@ -87,12 +107,6 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className={styles.headerActions}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className={styles.viewSwitch}
-            >
-              User View
-            </button>
             <button
               onClick={handleLogout}
               className={styles.adminLogout}
@@ -112,7 +126,9 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <p>Total Users</p>
-                <div className={styles.value}>{stats.totalUsers}</div>
+                <div className={styles.value}>
+                  {loading ? '...' : stats.totalUsers}
+                </div>
               </div>
             </div>
           </div>
@@ -124,7 +140,9 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <p>Total Products</p>
-                <div className={styles.value}>{stats.totalProducts}</div>
+                <div className={styles.value}>
+                  {loading ? '...' : stats.totalProducts}
+                </div>
               </div>
             </div>
           </div>
@@ -136,7 +154,9 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <p>Total Orders</p>
-                <div className={styles.value}>{stats.totalOrders}</div>
+                <div className={styles.value}>
+                  {loading ? '...' : stats.totalOrders}
+                </div>
               </div>
             </div>
           </div>
@@ -148,7 +168,9 @@ const AdminDashboard = () => {
               </div>
               <div className={styles.statInfo}>
                 <p>Total Revenue</p>
-                <div className={styles.value}>${stats.totalRevenue.toLocaleString()}</div>
+                <div className={styles.value}>
+                  ${loading ? '...' : stats.totalRevenue.toLocaleString()}
+                </div>
               </div>
             </div>
           </div>

@@ -4,17 +4,15 @@ import { useAuth } from '../../hooks/authHook.js';
 import Loader from "../../ui/Loader.jsx";
 
 const DashboardRedirect = () => {
-  const { user, loading, getDashboardPath } = useAuth();
+  const { user, loading, getDashboardPath, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading) {
       const dashboardPath = getDashboardPath();
       navigate(dashboardPath, { replace: true });
-    } else if (!loading && !user) {
-      navigate('/login', { replace: true });
     }
-  }, [user, loading, navigate, getDashboardPath]);
+  }, [user, loading, navigate, getDashboardPath, isAdmin]);
 
   if (loading) {
     return (

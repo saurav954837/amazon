@@ -5,41 +5,38 @@ import { generateTokens } from "../../utils/jwt.js";
 export const authController = {
     register: async (req, res) => {
         try {
-            const { username, first_name, last_name, email, password, role } = req.body;
-            const finalUsername = username || email.split('@')[0];
+            const { first_name, last_name, email, password, role } = req.body;
+            const username = email.split('@')[0];
             const existingUser = await User.readByEmail(email);
             if (existingUser) {
                 return res.status(400).json({
                     message: "Email already exists",
                     success: false
                 });
-            }
-
+            };
             const existingUsername = await User.readByUsername(username);
             if (existingUsername) {
                 return res.status(400).json({
                     message: "Username already exists",
                     success: false
                 });
-            }
+            };
 
             const saltRounds = 10;
             const password_hash = await bcrypt.hash(password, saltRounds);
 
             const userData = {
-                username: finalUsername,
-                first_name,
-                last_name,
-                email,
+                username: username,
+                first_name: first_name.trim(),
+                last_name: last_name.trim(),
+                email: email.trim(),
                 password_hash,
                 role: role || 'user'
             };
 
             const userId = await User.create(userData);
-
             const user = await User.readById(userId);
             const tokens = generateTokens(user);
-
             res.cookie('refreshToken', tokens.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
@@ -47,6 +44,7 @@ export const authController = {
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
+            // Return response
             res.status(201).json({
                 message: "User registered successfully",
                 success: true,
@@ -76,7 +74,7 @@ export const authController = {
         try {
             const { email, password } = req.body;
 
-            const user = await User.readByEmail(email);
+            const user = await User.readByEmail(email.trim());
             if (!user) {
                 return res.status(401).json({
                     message: "Invalid credentials",
@@ -180,7 +178,7 @@ export const authController = {
 
     refreshToken: async (req, res) => {
         try {
-            const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+            const refreshToken = req.cookies.refreshToken || req.body.refresh_token;
 
             if (!refreshToken) {
                 return res.status(400).json({
@@ -273,16 +271,16 @@ export const authController = {
             const updates = {};
 
             if (req.body.username !== undefined) {
-                updates.username = req.body.username;
+                updates.username = req.body.username.trim();
             }
             if (req.body.first_name !== undefined) {
-                updates.first_name = req.body.first_name;
+                updates.first_name = req.body.first_name.trim();
             }
             if (req.body.last_name !== undefined) {
-                updates.last_name = req.body.last_name;
+                updates.last_name = req.body.last_name.trim();
             }
             if (req.body.email !== undefined) {
-                updates.email = req.body.email;
+                updates.email = req.body.email.trim();
             }
 
             const affectedRows = await User.update(req.user.user_id, updates);

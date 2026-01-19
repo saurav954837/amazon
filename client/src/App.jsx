@@ -8,35 +8,44 @@ import {
   Navigate
 } from 'react-router-dom';
 
-// Layout Components
+// Amazon App Layouts
 import MainLayout from './app/layout/MainLayout.jsx';
 import AuthLayout from './app/layout/AuthLayout.jsx';
+
+// Admin & Guest Routes
 import AdminRoute from './app/routes/AdminRoute.jsx';
 import GuestRoute from './app/routes/GuestRoute.jsx';
 
-// Context Providers
+// Amazon App Utilities
+import Loader from './app/ui/Loader.jsx';
+import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
+import DashboardRedirect from './app/components/guard/DashboardRedirect.jsx';
+
+// Amazon App Providers
 import { AuthProvider } from './app/hooks/authHook.js';
 import { ProductProvider } from './app/context/ProductContext.jsx';
 
-// UI Components
-import Loader from './app/ui/Loader.jsx';
-import ErrorBoundary from './app/ui/ErrorBoundary.jsx';
-
-// Lazy loaded components
+// Amazon Landing
 const Homepage = lazy(() => import('./app/components/HomePage.jsx'));
-const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'));
 const NotFound = lazy(() => import('./app/components/NotFound.jsx'));
+
+// Authentication & Authorization Lazy Loaded Components
 const LoginPage = lazy(() => import('./app/components/auth/LoginPage.jsx'));
 const RegisterPage = lazy(() => import('./app/components/auth/RegisterPage.jsx'));
-const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.jsx'));
-const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
 const UnauthorizedPage = lazy(() => import('./app/components/UnauthorizedPage.jsx'));
+
+// User Lazy Loaded Components
+const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.jsx'));
+const ProductPage = lazy(() => import('./app/components/ProductPage.jsx'));
 const CartSidebar = lazy(() => import('./app/components/CartSidebar.jsx'));
 
-// Data loaders for route preloading
+// Admin Lazy Loaded Components
+const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
+const ProductManagement = lazy(() => import('./app/components/admin/ProductManagement.jsx'));
+const UserManagement = lazy(() => import('./app/components/admin/UserManagement.jsx'));
+
 import { productLoader, homepageLoader, searchLoader } from './app/utils/dataLoader.js';
 
-// Create router outside component to prevent recreation on re-renders
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route
@@ -51,7 +60,6 @@ const router = createBrowserRouter(
       errorElement={<div className="error-page">Something went wrong</div>}
       loader={homepageLoader}
     >
-      {/* Public Routes */}
       <Route
         index
         element={
@@ -61,7 +69,6 @@ const router = createBrowserRouter(
         }
       />
 
-      {/* Guest Only Routes - Login/Register */}
       <Route element={<GuestRoute />}>
         <Route
           path="login"
@@ -81,17 +88,16 @@ const router = createBrowserRouter(
         />
       </Route>
 
-      {/* Protected User Routes - Need Authentication */}
       <Route element={<AuthLayout />}>
         <Route
-          path="dashboard"
+          path="user-dashboard"
           element={
             <Suspense fallback={<Loader />}>
               <UserDashboard />
             </Suspense>
           }
         />
-        
+
         <Route
           path="orders"
           element={
@@ -111,7 +117,6 @@ const router = createBrowserRouter(
         />
       </Route>
 
-      {/* Admin Only Routes - Need Admin Role */}
       <Route element={<AdminRoute />}>
         <Route
           path="admin-dashboard"
@@ -122,18 +127,18 @@ const router = createBrowserRouter(
           }
         />
         <Route
-          path="admin/users"
+          path="admin/products"
           element={
             <Suspense fallback={<Loader />}>
-              <div>User Management</div>
+              <ProductManagement />
             </Suspense>
           }
         />
         <Route
-          path="admin/products"
+          path="admin/users"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Product Management</div>
+              <UserManagement />
             </Suspense>
           }
         />
@@ -147,7 +152,6 @@ const router = createBrowserRouter(
         />
       </Route>
 
-      {/* Error and Info Pages */}
       <Route
         path="unauthorized"
         element={
@@ -157,7 +161,6 @@ const router = createBrowserRouter(
         }
       />
 
-      {/* Product Routes */}
       <Route
         path="products"
         element={
@@ -182,7 +185,6 @@ const router = createBrowserRouter(
         />
       </Route>
 
-      {/* Category Routes */}
       <Route
         path="category/:category"
         element={
@@ -193,7 +195,6 @@ const router = createBrowserRouter(
         loader={({ params }) => searchLoader(params.category)}
       />
 
-      {/* Search Route */}
       <Route
         path="search"
         element={
@@ -208,17 +209,16 @@ const router = createBrowserRouter(
         }}
       />
 
-      {/* Dashboard Redirects */}
+      <Route
+        path="dashboard"
+        element={<DashboardRedirect />}
+      />
+
       <Route
         path="admin"
         element={<Navigate to="/admin-dashboard" replace />}
       />
-      <Route
-        path="user"
-        element={<Navigate to="/dashboard" replace />}
-      />
 
-      {/* 404 Page */}
       <Route
         path="*"
         element={

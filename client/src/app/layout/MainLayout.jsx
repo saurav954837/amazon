@@ -22,7 +22,7 @@ const MainLayout = () => {
 
   const handleProfileClick = () => {
     if (user) {
-      navigate('/profile')
+      navigate('/user-dashboard')
     } else {
       navigate('/login')
     }
@@ -30,7 +30,7 @@ const MainLayout = () => {
 
   const handleAdminClick = () => {
     if (isAdmin) {
-      navigate('/admin')
+      navigate('/admin-dashboard')
     }
   }
 

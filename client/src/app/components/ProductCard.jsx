@@ -1,11 +1,15 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTruck } from '@fortawesome/free-solid-svg-icons';
+import { faTruck, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { useProduct } from '../context/ProductContext.jsx';
 import { useNavigate } from 'react-router-dom';
 import AddToCartButton from './AddToCartButton.jsx';
+import { useAuth } from '../hooks/authHook.js';
 import styles from '../styles/ProductCard.module.css';
 
 const ProductCard = ({ product }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
+
   if (!product) {
     return (
       <div className={styles.productCard}>
@@ -93,7 +97,20 @@ const ProductCard = ({ product }) => {
   const handleCardClick = (e) => {
     if (e.target.closest('button')) return
     if (productId) {
-      navigate(`/products/${productId}`)
+      if (isAdmin) {
+        navigate(`/admin/products`)
+      } else {
+        navigate(`/products/${productId}`)
+      }
+    }
+  }
+
+  const handleEditProduct = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (productId) {
+      navigate(`/admin/products`)
     }
   }
 
@@ -152,7 +169,7 @@ const ProductCard = ({ product }) => {
           )}
         </div>
         
-        {isInCart && (
+        {isInCart && !isAdmin && (
           <div className={styles.cartIndicator}>
             <span className={styles.cartItemCount}>In Cart: {cartItemQuantity}</span>
             <span className={styles.cartItemTotal}>
@@ -179,17 +196,30 @@ const ProductCard = ({ product }) => {
         </div>
         
         <div className={styles.productActions}>
-          <div className={styles.addToCartWrapper}>
-            <AddToCartButton product={product} />
-          </div>
-          <button 
-            className={styles.buyNowBtn}
-            onClick={handleBuyNow}
-            aria-label={`Buy ${getProductName()} now`}
-            disabled={getProductStock() <= 0}
-          >
-            {isInCart ? 'View Details' : 'Buy Now'}
-          </button>
+          {isAdmin ? (
+            <button 
+              className={styles.editProductBtn}
+              onClick={handleEditProduct}
+              aria-label={`Edit ${getProductName()}`}
+            >
+              <FontAwesomeIcon icon={faEdit} />
+              Edit Product
+            </button>
+          ) : (
+            <>
+              <div className={styles.addToCartWrapper}>
+                <AddToCartButton product={product} />
+              </div>
+              <button 
+                className={styles.buyNowBtn}
+                onClick={handleBuyNow}
+                aria-label={`Buy ${getProductName()} now`}
+                disabled={getProductStock() <= 0}
+              >
+                {isInCart ? 'View Details' : 'Buy Now'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

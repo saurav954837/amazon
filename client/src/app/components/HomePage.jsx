@@ -408,7 +408,6 @@ const Homepage = () => {
             ].map((category, index) => (
               <a
                 key={index}
-                href={`/category/${category.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
                 className={styles.categoryCard}
                 aria-label={`Browse ${category.name}`}
               >

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:8000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -74,19 +74,18 @@ export const homepageLoader = async () => {
   };
 
   try {
-    const [featured, deals, categories] = await Promise.all([
-      api.get('/categories'),
-    ]);
-
+    const response = await api.get('/products/');
+    
     const data = {
-      featured: featured.data,
-      deals: deals.data,
-      categories: categories.data,
+      featured: response.data.data?.slice(0, 4) || [],
+      deals: response.data.data?.slice(4, 8) || [],
+      categories: response.data.data?.map(p => p.product_category) || [],
     };
 
     setCachedData(cacheKey, data)
     return data
   } catch (error) {
+    console.log('Homepage loader error:', error.message);
     return {
       featured: [],
       deals: [],
@@ -104,16 +103,27 @@ export const searchLoader = async (query = '') => {
   };
 
   try {
-    const response = await api.get('/products/search', {
-      params: { q: query },
-    })
+    const response = await api.get('/products/', {
+      params: { 
+        search: query,
+        limit: 50 
+      },
+    });
 
-    setCachedData(cacheKey, response.data)
-    return response.data
+    const data = {
+      results: response.data.data || [],
+      query,
+      total: response.data.data?.length || 0
+    };
+
+    setCachedData(cacheKey, data)
+    return data
   } catch (error) {
+    console.log('Search loader error:', error.message);
     return {
       results: [],
       query,
+      total: 0,
       error: 'Search failed',
     }
   };

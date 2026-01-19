@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/authHook.js';
 import Loader from '../ui/Loader.jsx';
 
 const GuestRoute = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, isAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -14,7 +14,10 @@ const GuestRoute = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    if (isAdmin) {
+      return <Navigate to="/admin-dashboard" replace />;
+    }
+    return <Navigate to="/user-dashboard" replace />;
   }
 
   return <Outlet />;
