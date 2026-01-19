@@ -21,7 +21,7 @@ const UserDashboard = () => {
     { label: 'Orders', value: '0', icon: faBox, color: styles.iconBlue },
     { label: 'Cart Items', value: cart.length.toString(), icon: faShoppingCart, color: styles.iconGreen },
     { label: 'Wishlist', value: '0', icon: faHistory, color: styles.iconYellow },
-    { label: 'Total Spent', value: `$${getCartTotal().toFixed(2)}`, icon: faCreditCard, color: styles.iconPurple },
+    { label: 'Total Spent', value: `${getCartTotal().toFixed(2)} EGP`, icon: faCreditCard, color: styles.iconPurple },
   ];
 
   const handleRemoveItem = (productId) => {
