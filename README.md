@@ -28,9 +28,12 @@ For sellers and administrators, the system provides comprehensive tools to manag
 server/
 ├── app/
 │   ├── controllers/
+│   │   ├── adminController.js
 │   │   ├── authController.js
+│   │   ├── cartController.js
 │   │   └── productController.js
 │   ├── models/
+│   │   ├── Cart.js
 │   │   ├── Product.js
 │   │   └── User.js
 │   ├── middlewares/
@@ -39,12 +42,17 @@ server/
 │   │   └── validationMiddleware.js
 │   └── validations/
 │       ├── authValidation.js
+│       ├── adminValidation.js
+│       ├── cartValidation.js
 │       └── productValidation.js
 ├── config/
 │   └── database.js
+├── node_modules/
 ├── routes/
 │   ├── api/
 │   │   ├── authRoutes.routes.js
+│   │   ├── userRoutes.routes.js
+│   │   ├── cartRoutes.routes.js
 │   │   └── productRoutes.routes.js
 │   └── web/
 │       └── license.js
@@ -53,6 +61,7 @@ server/
 ├── tests/
 │   └── test-connection.js
 ├── public/
+├── .env
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
@@ -63,15 +72,84 @@ server/
 ### Frontend (ReactJS + Bootstrap/Tailwind)
 ```
 client/
-│   ├── node_modules/
-│   ├── public/
-│   │   └── amazon.jpg
-│   ├── src/
-│   │   ├── assets/
-│   │   ├── App.css
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
+├── node_modules/
+├── public/
+│   └── amazon.jpg
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   ├── auth/
+│   │   │   │   ├── LoginPage.jsx
+│   │   │   │   ├── RequireAuth.jsx
+│   │   │   │   ├── RequireGuest.jsx
+│   │   │   │   └── RegisterPage.jsx
+│   │   │   ├── guard/
+│   │   │   │   ├── UserDashboard.jsx
+│   │   │   │   ├── AdminDashboard.jsx
+│   │   │   │   └── DashboardRedirect.jsx
+│   │   │   ├── store/
+│   │   │   │   ├── ProductPage.jsx
+│   │   │   │   ├── ProductCard.jsx
+│   │   │   │   ├── CategorizedProducts.jsx
+│   │   │   │   ├── CategoriesGrid.jsx
+│   │   │   │   └── CartSidebar.jsx
+│   │   │   ├── admin/
+│   │   │   │   ├── ProductManagement.jsx
+│   │   │   │   └── UserManagement.jsx
+│   │   │   ├── HomePage.jsx
+│   │   │   ├── Header.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── SearchBar.jsx
+│   │   │   ├── AddToCartButton.jsx
+│   │   │   ├── NotFound.jsx
+│   │   │   └── UnauthorizedPage.jsx
+│   │   ├── layout/
+│   │   │   ├── MainLayout.jsx
+│   │   │   └── AuthLayout.jsx
+│   │   ├── routes/
+│   │   │   ├── AdminRoute.jsx
+│   │   │   ├── ProtectedRoutes.jsx
+│   │   │   └── GuestRoute.jsx
+│   │   ├── context/
+│   │   │   └── ProductContext.jsx
+│   │   ├── hooks/
+│   │   │   └── authHook.js
+│   │   ├── ui/
+│   │   │   ├── Loader.jsx
+│   │   │   ├── NetworkError.jsx
+│   │   │   ├── RouterError.jsx
+│   │   │   └── ErrorBoundary.jsx
+│   │   ├── utils/
+│   │   │   └── dataLoader.js
+│   │   └── styles/
+│   │       ├── LoginPage.module.css
+│   │       ├── RegisterPage.module.css
+│   │       ├── UserDashboard.module.css
+│   │       ├── AdminDashboard.module.css
+│   │       ├── Auth.module.css
+│   │       ├── AddToCartButton.module.css
+│   │       ├── DashboardRedirect.module.css
+│   │       ├── ProductPage.module.css
+│   │       ├── CategorizedProducts.module.css
+│   │       ├── CategoriesGrid.module.css
+│   │       ├── CartSidebar.module.css
+│   │       ├── ProductManagement.module.css
+│   │       ├── UserManagement.module.css
+│   │       ├── HomePage.module.css
+│   │       ├── NotFound.module.css
+│   │       ├── UnauthorizedPage.module.css
+│   │       ├── MainLayout.module.css
+│   │       ├── SerachBar.module.css
+│   │       └── Loader.module.css
+│   ├── assets/
+│   │   ├── Amazon_icon.svg
+│   │   ├── amazon-header.png
+│   │   └── amazon-logo.jpg
+│   ├── App.jsx
+│   ├── index.css
+│   └── main.jsx
+├── .env
 ├── .gitignore
 ├── eslint.config.js
 ├── index.html

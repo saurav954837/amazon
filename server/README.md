@@ -41,9 +41,12 @@ For sellers and administrators, the system provides comprehensive tools to manag
 server/
 ├── app/
 │   ├── controllers/
+│   │   ├── adminController.js
 │   │   ├── authController.js
+│   │   ├── cartController.js
 │   │   └── productController.js
 │   ├── models/
+│   │   ├── Cart.js
 │   │   ├── Product.js
 │   │   └── User.js
 │   ├── middlewares/
@@ -52,12 +55,17 @@ server/
 │   │   └── validationMiddleware.js
 │   └── validations/
 │       ├── authValidation.js
+│       ├── adminValidation.js
+│       ├── cartValidation.js
 │       └── productValidation.js
 ├── config/
 │   └── database.js
+├── node_modules/
 ├── routes/
 │   ├── api/
 │   │   ├── authRoutes.routes.js
+│   │   ├── userRoutes.routes.js
+│   │   ├── cartRoutes.routes.js
 │   │   └── productRoutes.routes.js
 │   └── web/
 │       └── license.js
@@ -66,6 +74,7 @@ server/
 ├── tests/
 │   └── test-connection.js
 ├── public/
+├── .env
 ├── .gitignore
 ├── package-lock.json
 ├── package.json
