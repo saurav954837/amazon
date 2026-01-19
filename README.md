@@ -22,6 +22,45 @@ For sellers and administrators, the system provides comprehensive tools to manag
 > Coming soon...
 
 ---
+# 📱 Web System Screenshots
+## 🔐 Authentication Screens
+### Login Page
+![Login Page](./public/auth/auth%20(sign%20up%20page).png)
+*User authentication interface*
+
+### Registration Page  
+![Registration](./public/auth/auth%20(create%20account).png)
+*New user registration form*
+
+## 👥 User Screens
+### User Dashboard
+![User Homepage](./public/user/user%20(homepage).png)
+*Main user hompage*
+
+![User Product Page](./public/user/user%20(product%20page).png)
+*User product page*
+
+![User Product Detail](./public/user/user%20(product%20detail%20page).png)
+*User product detail*
+
+![User Dashboard](./public/user/user%20(user%20dashboard).png)
+*Main user interface with navigation*
+
+## ⚙️ Admin Screens
+### Admin Dashboard
+![Admin Dashboard](./public/admin/admin%20(admin%20dashboard).png)
+*Administrator control panel*
+
+![Admin Dashboard #2](./public/admin/admin%20(admin%20dashboard)%20(2).png)
+*Administrator control panel*
+
+![User Management](./public/admin/admin%20(user-management).png)
+*Admin user management interface*
+
+![Product Management](./public/admin/admin%20(product%20management%20page).png)
+*Admin product management interface*
+
+---
 ## 🏗️ Project Structure
 ### Backend (ExpressJS – MVC Architecture)
 ```
@@ -207,45 +246,6 @@ client/
                                   │                       │
                                   └───────────────────────┘
 ```
-
----
-# 📱 Web System Screenshots
-## 🔐 Authentication Screens
-### Login Page
-![Login Page](./public/auth/auth%20(sign%20up%20page).png)
-*User authentication interface*
-
-### Registration Page  
-![Registration](./public/auth/auth%20(create%20account).png)
-*New user registration form*
-
-## 👥 User Screens
-### User Dashboard
-![User Homepage](./public/user/user%20(homepage).png)
-*Main user hompage*
-
-![User Product Page](./public/user/user%20(product%20page).png)
-*User product page*
-
-![User Product Detail](./public/user/user%20(product%20detail%20page).png)
-*User product detail*
-
-![User Dashboard](./public/user/user%20(user%20dashboard).png)
-*Main user interface with navigation*
-
-## ⚙️ Admin Screens
-### Admin Dashboard
-![Admin Dashboard](./public/admin/admin%20(admin%20dashboard).png)
-*Administrator control panel*
-
-![Admin Dashboard #2](./public/admin/admin%20(admin%20dashboard)%20(2).png)
-*Administrator control panel*
-
-![User Management](./public/admin/admin%20(user-management).png)
-*Admin user management interface*
-
-![Product Management](./public/admin/admin%20(product%20management%20page).png)
-*Admin product management interface*
 
 ---
 ## 🛠️ Technologies Used
