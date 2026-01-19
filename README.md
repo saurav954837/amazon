@@ -292,18 +292,23 @@ client/
 * `POST /api/auth/register` – Register new user
 * `POST /api/auth/login` – User login
 * `POST /api/auth/logout` – User logout
-* `POST /api/auth/refresh-token` – Refresh JWT token
-* `GET /api/auth/profile` – Retrieve user profile
-* `PUT /api/auth/profile` – Update user profile
-* `PUT /api/auth/change-password` – Change user password
+* `GET /api/auth/verify` – Verify JWT token
 
 ### Products
 * `GET /api/products` – Get products (Admin: all / User: own)
 * `GET /api/products/:product_id` – Get products via id/search
 * `POST /api/products` – Create products (Admins only)
 * `PUT /api/products/:product_id` – Update products (Admins only)
-* `PATCH /api/products/:product_id` – Partially update product (Admins only)
 * `DELETE /api/products/:id` – Delete products (Admins only) 
+
+### 🛒 Cart Management
+* `GET /api/cart` – Get user's cart
+* `GET /api/cart/summary` – Get cart summary (total items, quantity, price)
+* `POST /api/cart` – Add product to cart
+* `POST /api/cart` – Add product to cart
+* `PUT /api/cart/:cart_id` – Update cart item quantity
+* `DELETE /api/cart/:cart_id` – Remove item from cart
+* `DELETE /api/cart` – Clear entire cart
 
 ---
 ## 🔒 Security Features
