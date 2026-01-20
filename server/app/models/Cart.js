@@ -1,7 +1,8 @@
 import { db_config } from "../../config/database.js";
 
 export const Cart = {
-    create: async (cartItem) => {
+    create: async (cartItem, connection = null) => {
+        const conn = connection || db_config;
         try {
             const stmt = `
                 INSERT INTO cart (user_id, product_id, quantity) 
@@ -9,7 +10,7 @@ export const Cart = {
                 ON DUPLICATE KEY UPDATE quantity = quantity + ?
             `;
 
-            const [result] = await db_config.query(stmt, [
+            const [result] = await conn.query(stmt, [
                 cartItem.user_id,
                 cartItem.product_id,
                 cartItem.quantity,
@@ -57,7 +58,7 @@ export const Cart = {
                 SELECT 
                     c.*,
                     p.product_name as product_name,
-                    p.product_price,
+                    p.product_price
                 FROM cart c
                 JOIN products p ON c.product_id = p.product_id
                 WHERE c.cart_id = ?
@@ -71,10 +72,11 @@ export const Cart = {
         }
     },
 
-    readByUserAndProduct: async (user_id, product_id) => {
+    readByUserAndProduct: async (user_id, product_id, connection = null) => {
+        const conn = connection || db_config;
         try {
-            const stmt = "SELECT * FROM cart WHERE user_id = ? AND product_id = ?";
-            const [rows] = await db_config.query(stmt, [user_id, product_id]);
+            const stmt = "SELECT * FROM cart WHERE user_id = ? AND product_id = ? FOR UPDATE";
+            const [rows] = await conn.query(stmt, [user_id, product_id]);
             return rows[0] || null;
         } catch (error) {
             console.error(`Cart readByUserAndProduct error: ${error.message}`);
@@ -82,10 +84,11 @@ export const Cart = {
         }
     },
 
-    updateQuantity: async (cart_id, quantity) => {
+    updateQuantity: async (cart_id, quantity, connection = null) => {
+        const conn = connection || db_config;
         try {
             if (quantity <= 0) {
-                return await Cart.delete(cart_id);
+                return await Cart.delete(cart_id, connection);
             }
 
             const stmt = `
@@ -94,7 +97,7 @@ export const Cart = {
                 WHERE cart_id = ?
             `;
             
-            const [result] = await db_config.query(stmt, [quantity, cart_id]);
+            const [result] = await conn.query(stmt, [quantity, cart_id]);
             return result.affectedRows;
         } catch (error) {
             console.error(`Cart updateQuantity error: ${error.message}`);
@@ -102,10 +105,11 @@ export const Cart = {
         }
     },
 
-    delete: async (cart_id) => {
+    delete: async (cart_id, connection = null) => {
+        const conn = connection || db_config;
         try {
             const stmt = "DELETE FROM cart WHERE cart_id = ?";
-            const [result] = await db_config.query(stmt, [cart_id]);
+            const [result] = await conn.query(stmt, [cart_id]);
             return result.affectedRows;
         } catch (error) {
             console.error(`Cart delete error: ${error.message}`);
@@ -113,10 +117,11 @@ export const Cart = {
         }
     },
 
-    deleteByUserId: async (user_id) => {
+    deleteByUserId: async (user_id, connection = null) => {
+        const conn = connection || db_config;
         try {
             const stmt = "DELETE FROM cart WHERE user_id = ?";
-            const [result] = await db_config.query(stmt, [user_id]);
+            const [result] = await conn.query(stmt, [user_id]);
             return result.affectedRows;
         } catch (error) {
             console.error(`Cart deleteByUserId error: ${error.message}`);
@@ -140,6 +145,17 @@ export const Cart = {
         } catch (error) {
             console.error(`Cart getCartSummary error: ${error.message}`);
             throw new Error(`Failed to get cart summary: ${error.message}`);
+        }
+    },
+
+    deleteAllByUserId: async (user_id) => {
+        try {
+            const stmt = "DELETE FROM cart WHERE user_id = ?";
+            const [result] = await db_config.query(stmt, [user_id]);
+            return result.affectedRows;
+        } catch (error) {
+            console.error(`Cart deleteAllByUserId error: ${error.message}`);
+            throw new Error(`Failed to clear cart: ${error.message}`);
         }
     }
 };

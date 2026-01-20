@@ -152,7 +152,7 @@ const ProductPage = () => {
     setIsAddingToCart(true)
     try {
       await addToCart(product, quantity)
-      navigate('/cart')
+      navigate('/user/cart')
     } catch (error) {
       console.error('Failed to add to cart:', error)
       alert('Failed to add to cart. Please try again.')

@@ -52,7 +52,6 @@ const MainLayout = () => {
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        user={user}
       />
     </div>
   )

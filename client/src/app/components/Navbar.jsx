@@ -25,7 +25,7 @@ const Navbar = () => {
 
   const categories = [
     { icon: faFire, label: 'Today\'s Deals', color: '#E47911' },
-    { icon: faMobile, label: 'Mobile Phones', color: '#febd69' },
+    { icon: faMobile, label: 'Phones', color: '#febd69' },
     { icon: faTv, label: 'Electronics', color: '#febd69' },
     { icon: faLaptop, label: 'Computers', color: '#febd69' },
     { icon: faRunning, label: 'Sports', color: '#febd69' },

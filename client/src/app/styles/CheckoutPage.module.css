@@ -1,0 +1,421 @@
+.checkoutContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.checkoutHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background: #e5e7eb;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.checkoutContent {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 40px;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sectionHeader h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.inputError {
+  border-color: #ef4444;
+}
+
+.errorText {
+  display: block;
+  margin-top: 4px;
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.paymentMethods {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paymentOption {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paymentOption:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.paymentOption input {
+  margin-right: 12px;
+}
+
+.paymentContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.paymentContent h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.paymentContent p {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.comingSoon {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: #f59e0b;
+  color: white;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.securityNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  color: #0369a1;
+  font-size: 14px;
+}
+
+.orderSummary {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 20px;
+}
+
+.orderSummary h3 {
+  margin: 0 0 20px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.summaryItems {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding-right: 8px;
+}
+
+.summaryItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.itemImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.itemDetails h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.itemMeta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.itemTotal {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.priceBreakdown {
+  margin: 24px 0;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: #6b7280;
+}
+
+.totalRow {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.totalPrice {
+  color: #1f2937;
+}
+
+.discountNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f0f9ff;
+  border-radius: 4px;
+  color: #0369a1;
+  font-size: 12px;
+  margin: 12px 0;
+}
+
+.placeOrderButton {
+  width: 100%;
+  padding: 16px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.placeOrderButton:hover:not(:disabled) {
+  background: #059669;
+}
+
+.placeOrderButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.terms {
+  margin-top: 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.successContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.successCard {
+  background: white;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.successIcon {
+  font-size: 64px;
+  color: #10b981;
+  margin-bottom: 24px;
+}
+
+.successCard h1 {
+  margin: 0 0 12px;
+  color: #1f2937;
+  font-size: 28px;
+}
+
+.successMessage {
+  color: #6b7280;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.orderSummary {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  color: #6b7280;
+}
+
+.summaryItem:last-child {
+  margin-bottom: 0;
+}
+
+.summaryItem strong {
+  color: #1f2937;
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f0f9ff;
+  color: #0369a1;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.dashboardButton,
+.continueButton {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dashboardButton {
+  background: #3b82f6;
+  color: white;
+  border: none;
+}
+
+.dashboardButton:hover {
+  background: #2563eb;
+}
+
+.continueButton {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.continueButton:hover {
+  background: #f9fafb;
+}

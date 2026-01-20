@@ -10,6 +10,13 @@ export const db_config = mysql.createPool({
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
     waitForConnections: true,
-    connectionLimit: 20,
-    queueLimit: 0
+    connectionLimit: 10,
+    queueLimit: 100,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 10000,
+    idleTimeout: 60000,
+    connectionTimeout: 10000,
+    timezone: '+00:00',
+    charset: 'utf8mb4',
+    dateStrings: true
 });

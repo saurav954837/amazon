@@ -20,6 +20,7 @@ export const ProductProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const [cart, setCart] = useState([]);
   const [cartLoading, setCartLoading] = useState(false);
+  const [syncPending, setSyncPending] = useState(false);
 
   const API_BASE = 'http://localhost:8000/api';
 
@@ -43,14 +44,14 @@ export const ProductProvider = ({ children }) => {
 
   const getPopularCategories = useCallback((limit = 8) => {
     const categoryCounts = {};
-    
+
     products.forEach(product => {
       const category = product.product_category || product.category || 'Uncategorized';
       categoryCounts[category] = (categoryCounts[category] || 0) + 1;
     });
-    
+
     return Object.entries(categoryCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, limit)
       .map(([category, count]) => ({
         name: category,
@@ -61,7 +62,7 @@ export const ProductProvider = ({ children }) => {
 
   const getCategoryIcon = (category) => {
     const categoryLower = category.toLowerCase();
-    
+
     const iconMap = {
       'electronics': 'faTv',
       'computers': 'faLaptop',
@@ -79,19 +80,19 @@ export const ProductProvider = ({ children }) => {
       'sportswear': 'faShirt',
       'makeup': 'faHeart'
     };
-    
+
     for (const [key, value] of Object.entries(iconMap)) {
       if (categoryLower.includes(key)) {
         return value;
       }
     }
-    
+
     return 'faTag';
   };
 
   const fetchCartFromServer = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
-    
+
     if (!token) {
       const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
       setCart(localCart);
@@ -100,31 +101,36 @@ export const ProductProvider = ({ children }) => {
 
     try {
       setCartLoading(true);
-      
+
       const response = await axios.get(`${API_BASE}/cart/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json'
-        },
-        timeout: 3000,
-        validateStatus: function (status) {
-          return status < 500;
         }
       });
 
-      if (response.status === 200 && response.data && Array.isArray(response.data)) {
-        setCart(response.data);
-        localStorage.setItem('guestCart', JSON.stringify(response.data));
-      } else if (response.status === 401 || response.status === 403) {
-        localStorage.removeItem('accessToken');
-        const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-        setCart(localCart);
-      } else {
-        const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-        setCart(localCart);
+      if (response.status === 200 && response.data) {
+        const serverCart = response.data.data?.cart || response.data.cart || [];
+
+        if (serverCart.length > 0) {
+          const formattedCart = serverCart.map(item => ({
+            product_id: item.product_id || item.id,
+            product_name: item.product_name || item.name,
+            product_price: item.product_price || item.price,
+            product_image: item.product_image || item.image,
+            quantity: item.quantity || 1
+          }));
+
+          setCart(formattedCart);
+          localStorage.setItem('guestCart', JSON.stringify(formattedCart));
+        } else {
+          const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+          if (localCart.length > 0) {
+            setCart(localCart);
+          }
+        }
       }
     } catch (err) {
-      console.warn('Using local cart data - API unavailable');
       const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
       setCart(localCart);
     } finally {
@@ -134,46 +140,61 @@ export const ProductProvider = ({ children }) => {
 
   const syncCartToServer = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
-    if (!token) return;
+    if (!token || cart.length === 0 || syncPending) return;
 
     try {
-      const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
-      if (localCart.length === 0) return;
+      setSyncPending(true);
 
-      await axios.post(`${API_BASE}/cart/sync`, localCart, {
+      const cartForSync = cart.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity
+      }));
+
+      await axios.post(`${API_BASE}/cart/sync`, cartForSync, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        timeout: 3000,
-        validateStatus: function (status) {
-          return status < 500;
         }
       });
-      
+
       localStorage.removeItem('guestCart');
     } catch (err) {
-      console.warn('Failed to sync cart with server. Using local storage.');
+      console.error('Sync failed:', err);
+    } finally {
+      setSyncPending(false);
+    }
+  }, [cart, syncPending]);
+
+  useEffect(() => {
+    const localCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+    if (localCart.length > 0) {
+      setCart(localCart);
+    }
+
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      fetchCartFromServer();
     }
   }, []);
 
   useEffect(() => {
-    fetchCartFromServer();
-  }, [fetchCartFromServer]);
+    if (cart.length > 0) {
+      localStorage.setItem('guestCart', JSON.stringify(cart));
+    }
+  }, [cart]);
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (token) {
+    if (token && cart.length > 0) {
       const timer = setTimeout(() => {
         syncCartToServer();
-      }, 1000);
+      }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [syncCartToServer]);
+  }, [cart, syncCartToServer]);
 
   const saveCartToStorage = (newCart) => {
     setCart(newCart);
-    localStorage.setItem('guestCart', JSON.stringify(newCart));
   };
 
   const addToCart = async (product, quantity = 1) => {
@@ -186,11 +207,10 @@ export const ProductProvider = ({ children }) => {
     } else {
       const cartItem = {
         product_id: product.product_id,
-        name: product.product_name,
-        price: product.product_price,
-        image: product.product_image,
-        quantity: quantity,
-        added_at: new Date().toISOString()
+        product_name: product.product_name || product.name,
+        product_price: product.product_price || product.price,
+        product_image: product.product_image || product.image,
+        quantity: quantity
       };
       newCart = [...cart, cartItem];
     }
@@ -207,14 +227,9 @@ export const ProductProvider = ({ children }) => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          timeout: 3000,
-          validateStatus: function (status) {
-            return status < 500;
           }
         });
       } catch (err) {
-        console.warn('Failed to sync cart item to server. Using local storage.');
       }
     }
 
@@ -231,14 +246,9 @@ export const ProductProvider = ({ children }) => {
         await axios.delete(`${API_BASE}/cart/${productId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
-          },
-          timeout: 3000,
-          validateStatus: function (status) {
-            return status < 500;
           }
         });
       } catch (err) {
-        console.warn('Failed to remove from server. Using local storage.');
       }
     }
   };
@@ -249,12 +259,12 @@ export const ProductProvider = ({ children }) => {
       return;
     }
 
-    const newCart = cart.map(item => 
-      item.product_id === productId 
+    const newCart = cart.map(item =>
+      item.product_id === productId
         ? { ...item, quantity: newQuantity }
         : item
     );
-    
+
     saveCartToStorage(newCart);
 
     const token = localStorage.getItem('accessToken');
@@ -266,41 +276,31 @@ export const ProductProvider = ({ children }) => {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          },
-          timeout: 3000,
-          validateStatus: function (status) {
-            return status < 500;
           }
         });
       } catch (err) {
-        console.warn('Failed to update quantity on server. Using local storage.');
       }
     }
   };
 
   const clearCart = async () => {
     saveCartToStorage([]);
-    
+
     const token = localStorage.getItem('accessToken');
     if (token) {
       try {
         await axios.delete(`${API_BASE}/cart/`, {
           headers: {
             'Authorization': `Bearer ${token}`
-          },
-          timeout: 3000,
-          validateStatus: function (status) {
-            return status < 500;
           }
         });
       } catch (err) {
-        console.warn('Failed to clear server cart. Using local storage.');
       }
     }
   };
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + (item.product_price * item.quantity), 0);
   };
 
   const getCartCount = () => {
@@ -311,16 +311,15 @@ export const ProductProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await axios.get(`${API_BASE}/products/`, {
-        timeout: 5000,
         headers: {
           'Accept': 'application/json',
         }
       });
-      
+
       let productsData = [];
-      
+
       if (Array.isArray(response.data)) {
         productsData = response.data;
       } else if (response.data.products && Array.isArray(response.data.products)) {
@@ -337,9 +336,8 @@ export const ProductProvider = ({ children }) => {
           }
         }
       }
-      
+
       if (productsData.length > 0) {
-        setProducts(productsData);
         const formatProduct = (product) => ({
           product_id: product.product_id || product.id,
           product_name: product.product_name || product.name || 'Product',
@@ -355,7 +353,7 @@ export const ProductProvider = ({ children }) => {
           isPrime: product.isPrime || Math.random() > 0.5,
           originalPrice: product.originalPrice || product.product_price * 1.3
         });
-    
+
         const formattedProducts = productsData.map(formatProduct);
         setProducts(formattedProducts);
         setFeaturedProducts(formattedProducts.slice(0, 4));
@@ -364,7 +362,7 @@ export const ProductProvider = ({ children }) => {
       } else {
         createMockData();
       }
-      
+
     } catch (err) {
       createMockData();
       setError('Using demo data - API connection failed');
@@ -376,11 +374,11 @@ export const ProductProvider = ({ children }) => {
   const createMockData = () => {
     const categories = ['Electronics', 'Fashion', 'Home & Kitchen', 'Books', 'Health & Beauty', 'Sports'];
     const brands = ['Samsung', 'Apple', 'Sony', 'Nike', 'Adidas', 'Amazon Basics', 'Philips', 'LG'];
-    
+
     const mockProducts = Array.from({ length: 50 }, (_, i) => {
       const categoryIndex = i % categories.length;
       const brandIndex = i % brands.length;
-      
+
       return {
         product_id: i + 1,
         product_name: `${brands[brandIndex]} Product ${i + 1}`,
@@ -397,7 +395,7 @@ export const ProductProvider = ({ children }) => {
         originalPrice: 149.99 + (i * 8)
       };
     });
-    
+
     setProducts(mockProducts);
     setFeaturedProducts(mockProducts.slice(0, 4));
     setDeals(mockProducts.slice(4, 8));

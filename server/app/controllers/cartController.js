@@ -1,8 +1,12 @@
 import { Cart } from "../models/Cart.js";
+import { db_config } from "../../config/database.js";
 
 export const cartController = {
     addToCart: async (req, res) => {
+        const connection = await db_config.getConnection();
         try {
+            await connection.beginTransaction();
+            
             const { product_id, quantity = 1 } = req.body;
             const user_id = req.user.user_id;
 
@@ -12,7 +16,8 @@ export const cartController = {
                 quantity: parseInt(quantity)
             };
 
-            await Cart.create(cartItem);
+            await Cart.create(cartItem, connection);
+            await connection.commit();
 
             const cart = await Cart.readByUserId(user_id);
             const summary = await Cart.getCartSummary(user_id);
@@ -26,6 +31,7 @@ export const cartController = {
                 }
             });
         } catch (error) {
+            await connection.rollback();
             console.error(`Add to cart error: ${error.message}`);
 
             if (error.message.includes('foreign key constraint')) {
@@ -39,6 +45,8 @@ export const cartController = {
                 message: "Failed to add product to cart",
                 success: false
             });
+        } finally {
+            connection.release();
         }
     },
 
@@ -67,37 +75,38 @@ export const cartController = {
     },
 
     updateCartItem: async (req, res) => {
+        const connection = await db_config.getConnection();
         try {
-            const { cart_id } = req.params;
+            await connection.beginTransaction();
+            
+            const { product_id } = req.params;
             const { quantity } = req.body;
+            const user_id = req.user.user_id;
 
-            const cartItem = await Cart.readByCartId(cart_id);
+            const cartItem = await Cart.readByUserAndProduct(user_id, product_id, connection);
 
             if (!cartItem) {
+                await connection.rollback();
                 return res.status(404).json({
                     message: "Cart item not found",
                     success: false
                 });
             }
 
-            if (cartItem.user_id !== req.user.user_id) {
-                return res.status(403).json({
-                    message: "Unauthorized to update this cart item",
-                    success: false
-                });
-            }
-
-            const affectedRows = await Cart.updateQuantity(cart_id, parseInt(quantity));
+            const affectedRows = await Cart.updateQuantity(cartItem.cart_id, parseInt(quantity), connection);
 
             if (affectedRows === 0) {
+                await connection.rollback();
                 return res.status(404).json({
                     message: "Cart item not found",
                     success: false
                 });
             }
 
-            const cart = await Cart.readByUserId(req.user.user_id);
-            const summary = await Cart.getCartSummary(req.user.user_id);
+            await connection.commit();
+
+            const cart = await Cart.readByUserId(user_id);
+            const summary = await Cart.getCartSummary(user_id);
 
             res.json({
                 message: "Cart item updated successfully",
@@ -108,45 +117,49 @@ export const cartController = {
                 }
             });
         } catch (error) {
+            await connection.rollback();
             console.error(`Update cart item error: ${error.message}`);
             res.status(500).json({
                 message: "Failed to update cart item",
                 success: false
             });
+        } finally {
+            connection.release();
         }
     },
 
     removeFromCart: async (req, res) => {
+        const connection = await db_config.getConnection();
         try {
-            const { cart_id } = req.params;
+            await connection.beginTransaction();
+            
+            const { product_id } = req.params;
+            const user_id = req.user.user_id;
 
-            const cartItem = await Cart.readByCartId(cart_id);
+            const cartItem = await Cart.readByUserAndProduct(user_id, product_id, connection);
 
             if (!cartItem) {
+                await connection.rollback();
                 return res.status(404).json({
                     message: "Cart item not found",
                     success: false
                 });
             }
 
-            if (cartItem.user_id !== req.user.user_id) {
-                return res.status(403).json({
-                    message: "Unauthorized to remove this cart item",
-                    success: false
-                });
-            }
-
-            const affectedRows = await Cart.delete(cart_id);
+            const affectedRows = await Cart.delete(cartItem.cart_id, connection);
 
             if (affectedRows === 0) {
+                await connection.rollback();
                 return res.status(404).json({
                     message: "Cart item not found",
                     success: false
                 });
             }
 
-            const cart = await Cart.readByUserId(req.user.user_id);
-            const summary = await Cart.getCartSummary(req.user.user_id);
+            await connection.commit();
+
+            const cart = await Cart.readByUserId(user_id);
+            const summary = await Cart.getCartSummary(user_id);
 
             res.json({
                 message: "Product removed from cart",
@@ -157,11 +170,14 @@ export const cartController = {
                 }
             });
         } catch (error) {
+            await connection.rollback();
             console.error(`Remove from cart error: ${error.message}`);
             res.status(500).json({
                 message: "Failed to remove product from cart",
                 success: false
             });
+        } finally {
+            connection.release();
         }
     },
 
@@ -169,7 +185,7 @@ export const cartController = {
         try {
             const user_id = req.user.user_id;
 
-            const affectedRows = await Cart.deleteByUserId(user_id);
+            const affectedRows = await Cart.deleteAllByUserId(user_id);
 
             res.json({
                 message: "Cart cleared successfully",
@@ -214,38 +230,48 @@ export const cartController = {
     },
 
     syncCart: async (req, res) => {
+        const connection = await db_config.getConnection();
         try {
+            await connection.beginTransaction();
+            
             const cartItems = req.body;
             const userId = req.user.user_id;
-            await Cart.deleteByUserId(userId);
+
             if (!Array.isArray(cartItems)) {
+                await connection.rollback();
                 return res.status(400).json({
                     success: false,
                     message: 'Cart items must be an array'
                 });
             }
 
+            await Cart.deleteByUserId(userId, connection);
+
             if (cartItems.length > 0) {
-                const cartPromises = cartItems.map(item =>
-                    Cart.create({
+                for (const item of cartItems) {
+                    await Cart.create({
                         user_id: userId,
                         product_id: item.product_id,
                         quantity: item.quantity || 1
-                    })
-                );
-
-                await Promise.all(cartPromises);
+                    }, connection);
+                }
             }
+
+            await connection.commit();
+
             res.json({
                 success: true,
                 message: 'Cart synced successfully'
             });
         } catch (error) {
+            await connection.rollback();
             console.error('Sync cart error:', error);
             res.status(500).json({
                 success: false,
                 error: 'Failed to sync cart'
             });
+        } finally {
+            connection.release();
         }
     }
 };

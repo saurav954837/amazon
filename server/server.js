@@ -11,6 +11,7 @@ import { productRouter } from "./routes/api/productRoutes.routes.js";
 import { authRouter } from "./routes/api/authRoutes.routes.js";
 import { userRouter } from "./routes/api/userRoutes.routes.js";
 import { cartRouter } from "./routes/api/cartRoutes.routes.js";
+import { orderRouter } from "./routes/api/orderRoutes.routes.js";
 
 // Config
 dotenv.config();
@@ -70,6 +71,7 @@ app.use("/api/products/", productRouter);
 app.use("/api/auth/", authRouter);
 app.use("/api/cart/", cartRouter);
 app.use("/api/admin/users", userRouter);
+app.use('/api/orders', orderRouter);
 
 // 404 handler
 app.use((req, res) => {

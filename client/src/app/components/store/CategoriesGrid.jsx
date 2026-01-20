@@ -19,7 +19,7 @@ const CategoriesGrid = () => {
   const categories = [
     { icon: faMobile, label: 'Electronics', path: 'electronics' },
     { icon: faLaptop, label: 'Computers', path: 'computers' },
-    { icon: faMobile, label: 'Mobile Phones', path: 'mobile-phones' },
+    { icon: faMobile, label: 'Mobile Phones', path: 'phones' },
     { icon: faHome, label: 'Home & Kitchen', path: 'home-kitchen' },
     { icon: faUtensils, label: 'Grocery', path: 'grocery' },
     { icon: faShirt, label: 'Fashion', path: 'fashion' },

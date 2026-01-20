@@ -39,7 +39,7 @@ const ProductManagement = () => {
   const [formErrors, setFormErrors] = useState({});
 
   const categories = [
-    'Electronics', 'Clothing', 'Books', 'Home & Kitchen', "Mobile Phones",
+    'Electronics', 'Clothing', 'Books', 'Home & Kitchen', "Phones",
     'Beauty', 'Sports', 'Toys', 'Automotive', "Grocery"
   ];
 

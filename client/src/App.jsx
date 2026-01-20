@@ -39,6 +39,9 @@ const UserDashboard = lazy(() => import('./app/components/guard/UserDashboard.js
 const ProductPage = lazy(() => import('./app/components/store/ProductPage.jsx'));
 const CategorizedProducts = lazy(() => import('./app/components/store/CategorizedProducts.jsx'));
 const CartSidebar = lazy(() => import('./app/components/store/CartSidebar.jsx'));
+const CheckoutPage = lazy(() => import('./app/components/store/CheckoutPage.jsx'));
+const OrderManagement = lazy(() => import('./app/components/admin/OrderManagement.jsx'));
+const UserOrders = lazy(() => import('./app/components/UserOrders.jsx'));
 
 // Admin Lazy Loaded Components
 const AdminDashboard = lazy(() => import('./app/components/guard/AdminDashboard.jsx'));
@@ -100,24 +103,34 @@ const router = createBrowserRouter(
         />
 
         <Route
-          path="orders"
-          element={
-            <Suspense fallback={<Loader />}>
-              <div>Orders</div>
-            </Suspense>
-          }
-        />
-
-        <Route
-          path="cart"
+          path="user/cart"
           element={
             <Suspense fallback={<Loader />}>
               <CartSidebar />
             </Suspense>
           }
         />
+
+        <Route
+          path="user/orders"
+          element={
+            <Suspense fallback={<Loader />}>
+              <UserOrders />
+            </Suspense>
+          }
+        />
+
+        <Route
+          path="checkout"
+          element={
+            <Suspense fallback={<Loader />}>
+              <CheckoutPage />
+            </Suspense>
+          }
+        />
       </Route>
 
+      {/* Admin Routes */}
       <Route element={<AdminRoute />}>
         <Route
           path="admin-dashboard"
@@ -147,7 +160,7 @@ const router = createBrowserRouter(
           path="admin/orders"
           element={
             <Suspense fallback={<Loader />}>
-              <div>Order Management</div>
+              <OrderManagement />
             </Suspense>
           }
         />

@@ -14,9 +14,9 @@ export const addToCartValidator = [
 ];
 
 export const updateCartItemValidator = [
-    param("cart_id")
-        .notEmpty().withMessage("Cart ID is required")
-        .isInt({ min: 1 }).withMessage("Cart ID must be a positive integer")
+    param("product_id")
+        .notEmpty().withMessage("Product ID is required")
+        .isInt({ min: 1 }).withMessage("Product ID must be a positive integer")
         .toInt(),
 
     body("quantity")
@@ -30,8 +30,8 @@ export const updateCartItemValidator = [
 ];
 
 export const cartIdValidator = [
-    param("cart_id")
-        .notEmpty().withMessage("Cart ID is required")
-        .isInt({ min: 1 }).withMessage("Cart ID must be a positive integer")
+    param("product_id")
+        .notEmpty().withMessage("Product ID is required")
+        .isInt({ min: 1 }).withMessage("Product ID must be a positive integer")
         .toInt()
 ];

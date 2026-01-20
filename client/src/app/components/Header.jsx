@@ -214,14 +214,13 @@ const Header = ({ onCartClick }) => {
 
   const handleProfileClick = () => {
     if (user) {
-      secureNavigate('/dashboard');
+      if (isAdmin) {
+        secureNavigate('/admin-dashboard');
+      } else {
+        secureNavigate('/user-dashboard');
+      }
       setShowUserDropdown(false);
-    }
-    else if (isAdmin) {
-      secureNavigate('/admin-dashboard');
-      setShowUserDropdown(false);
-    }
-    else {
+    } else {
       secureNavigate('/login');
     }
   };
@@ -239,7 +238,11 @@ const Header = ({ onCartClick }) => {
 
   const handleOrdersClick = () => {
     if (user) {
-      secureNavigate('/orders');
+      if (isAdmin) {
+        secureNavigate('/admin/orders');
+      } else {
+        secureNavigate('/user/orders');
+      }
       setShowUserDropdown(false);
     } else {
       secureNavigate('/login');
@@ -431,7 +434,7 @@ const Header = ({ onCartClick }) => {
                             role="menuitem"
                           >
                             <FontAwesomeIcon icon={faBox} aria-hidden="true" />
-                            Your Orders
+                            {isAdmin ? "Manage Orders" : "Your Orders"}
                           </button>
                         </div>
 
@@ -482,46 +485,46 @@ const Header = ({ onCartClick }) => {
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && handleOrdersClick()}
-                aria-label="Returns & Orders"
+                aria-label={isAdmin ? "Order Management" : "Returns & Orders"}
               >
-                <span className={styles.returns}>Returns</span>
-                <span className={styles.ordersText}>& Orders</span>
+                <span className={styles.returns}>
+                  {isAdmin ? "Order" : "Returns"}
+                </span>
+                <span className={styles.ordersText}>
+                  {isAdmin ? "Management" : "& Orders"}
+                </span>
               </div>
 
               {isAdmin ? (
-                <>
-                  <div
-                    className={styles.admin}
-                    onClick={handleAdminClick}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && handleAdminClick()}
-                    aria-label="Admin Profile"
-                  >
-                    <div className={styles.adminProfileButton}>
-                      <FontAwesomeIcon icon={faUserCircle} className={styles.adminIcon} />
-                    </div>
+                <div
+                  className={styles.admin}
+                  onClick={handleAdminClick}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdminClick()}
+                  aria-label="Admin Profile"
+                >
+                  <div className={styles.adminProfileButton}>
+                    <FontAwesomeIcon icon={faUserCircle} className={styles.adminIcon} />
                   </div>
-                </>
+                </div>
               ) : (
-                <>
-                  <div
-                    className={styles.cart}
-                    onClick={handleCartClick}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && handleCartClick()}
-                    aria-label="Shopping cart"
-                  >
-                    <div className={styles.cartIconWrapper}>
-                      <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
-                      {cartCount > 0 && (
-                        <span className={styles.cartCount}>{cartCount}</span>
-                      )}
-                    </div>
-                    <span className={styles.cartText}>Cart</span>
+                <div
+                  className={styles.cart}
+                  onClick={handleCartClick}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCartClick()}
+                  aria-label="Shopping cart"
+                >
+                  <div className={styles.cartIconWrapper}>
+                    <FontAwesomeIcon icon={faShoppingCart} className={styles.cartIcon} />
+                    {cartCount > 0 && (
+                      <span className={styles.cartCount}>{cartCount}</span>
+                    )}
                   </div>
-                </>
+                  <span className={styles.cartText}>Cart</span>
+                </div>
               )}
             </div>
           </div>
@@ -556,7 +559,7 @@ const Header = ({ onCartClick }) => {
                   </button>
                   <button onClick={handleOrdersClick} className={styles.mobileNavItem}>
                     <FontAwesomeIcon icon={faBox} />
-                    Your Orders
+                    {isAdmin ? "Manage Orders" : "Your Orders"}
                   </button>
                   {isAdmin && (
                     <button onClick={handleAdminClick} className={styles.mobileNavItem}>

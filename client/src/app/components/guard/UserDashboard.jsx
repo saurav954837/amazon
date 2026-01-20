@@ -160,9 +160,9 @@ const UserDashboard = () => {
                       {cart.map(item => (
                         <div key={item.product_id} className={styles.cartItem}>
                           <div className={styles.itemImageContainer}>
-                            <img 
-                              src={item.image} 
-                              alt={item.name} 
+                            <img
+                              src={item.product_image}
+                              alt={item.product_name}
                               className={styles.itemImage}
                               onError={(e) => {
                                 e.target.src = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=100&q=80';
@@ -170,7 +170,7 @@ const UserDashboard = () => {
                             />
                           </div>
                           <div className={styles.itemInfo}>
-                            <h4 
+                            <h4
                               className={styles.itemTitle}
                               onClick={() => handleViewProduct(item.product_id)}
                             >
@@ -178,16 +178,16 @@ const UserDashboard = () => {
                             </h4>
                             <div className={styles.itemDetails}>
                               <span className={styles.itemQuantity}>Quantity: {item.quantity}</span>
-                              <span className={styles.itemPrice}>Price: ${(item.price * item.quantity).toFixed(2)}</span>
+                              <span className={styles.itemPrice}>Price: {(item.product_price * item.quantity).toFixed(2)} EGP</span>
                             </div>
                             <div className={styles.itemActions}>
-                              <button 
+                              <button
                                 className={styles.viewBtn}
                                 onClick={() => handleViewProduct(item.product_id)}
                               >
                                 View Product
                               </button>
-                              <button 
+                              <button
                                 className={styles.removeBtn}
                                 onClick={() => handleRemoveItem(item.product_id)}
                               >
@@ -204,7 +204,7 @@ const UserDashboard = () => {
                       <div className={styles.summaryDetails}>
                         <div className={styles.summaryRow}>
                           <span>Subtotal ({cart.length} items)</span>
-                          <span>${getCartTotal().toFixed(2)}</span>
+                          <span>{getCartTotal().toFixed(2)} EGP</span>
                         </div>
                         <div className={styles.summaryRow}>
                           <span>Shipping</span>
@@ -212,15 +212,15 @@ const UserDashboard = () => {
                         </div>
                         <div className={styles.summaryRow}>
                           <span>Tax</span>
-                          <span>${(getCartTotal() * 0.08).toFixed(2)}</span>
+                          <span>{(getCartTotal() * 0.08).toFixed(2)} EGP</span>
                         </div>
                         <div className={styles.summaryDivider}></div>
                         <div className={`${styles.summaryRow} ${styles.totalRow}`}>
                           <span>Total</span>
-                          <span>${(getCartTotal() * 1.08).toFixed(2)}</span>
+                          <span>{(getCartTotal() * 1.08).toFixed(2)} EGP</span>
                         </div>
                       </div>
-                      <button 
+                      <button
                         className={styles.checkoutBtn}
                         onClick={() => navigate('/cart')}
                       >
