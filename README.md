@@ -483,11 +483,13 @@ The name**Amazon** is used strictly as a conceptual reference for learning and p
 *All trademarks, service marks, and brand names referenced remain the property of their respective owners*.
 
 This software and associated documentation are proprietary and confidential. No part of this project may be reproduced, distributed, or transmitted in any form without prior written permission from the author.
+
 ---
 ## 💭 A Personal Note
 *This system design represents my **first major step into backend engineering** following industry best practices. **While I acknowledge this isn't a 100% complete, fully integrated business service, this project marks a significant milestone in my career development.***
 
 *As I transition from learning concepts to implementing real-world systems, I'm embracing the complexity and responsibility that comes with backend engineering. This **Amazon-like e-commerce platform** isn't just another CRUD application it's my foundation for understanding how robust, scalable systems are built.*
+
 ---
 ## 👥 Author
 * **Ahmed Medhat** – Full Stack Web Developer
