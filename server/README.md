@@ -174,4 +174,4 @@ This software and associated documentation are proprietary and confidential. *No
 
 ---
 ## 👥 Author
-* **Ahmed Medhat** – Full Stack Web Developer
+* **Ahmed Medhat** – Junior Backend Engineer

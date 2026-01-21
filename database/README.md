@@ -199,4 +199,4 @@ The name **Amazon** is used strictly as a conceptual reference for learning and 
 This software and associated documentation are proprietary and confidential. No part of this project may be reproduced, distributed, or transmitted in any form without prior written permission from the author.
 ---
 ## 👥 Author
-* **Ahmed Medhat** – Full Stack Web Developer
+* **Ahmed Medhat** – Junior Backend Engineer
