@@ -248,6 +248,85 @@ client/
 ```
 
 ---
+## 🏗️ System Architecture Diagram
+┌─────────────────────────────────────────────────────────────┐
+│                    Client (React Frontend)                  │
+│                    • Bootstrap/Tailwind UI                  │
+│                    • Responsive Design                      │
+│                    • JWT Token Management                   │
+└─────────────┬─────────────────────────────────────┬─────────┘
+              │                                     │
+              ▼                                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    API Gateway / Load Balancer              │
+│                    • Rate Limiting                          │
+│                    • CORS Management                        │
+│                    • Request Routing                        │
+└─────────────┬─────────────────────────────────────┬─────────┘
+              │                                     │
+              ▼                                     ▼
+┌────────────────────────────────────────────────────────────┐
+│                    Express.js Server                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐   │
+│  │   Routes    │  │ Middlewares │  │     Controllers   │   │
+│  │ • API       │  │ • Auth      │  │ • Business Logic  │   │
+│  │ • Web       │  │ • Validation│  │ • Data Processing │   │
+│  │ • Protected │  │ • Admin     │  │ • Error Handling  │   │
+│  └──────┬──────┘  └──────┬──────┘  └──────────┬────────┘   │
+│         │                │                     │           │
+│         └────────────────┼─────────────────────┘           │
+│                          ▼                                 │
+│                 ┌──────────────┐                           │
+│                 │    Models    │                           │
+│                 │ • Data Layer │                           │
+│                 │ • ORM Queries│                           │
+│                 │ • Validation │                           │
+│                 └──────┬───────┘                           │
+└────────────────────────┼───────────────────────────────────┘
+                         ▼
+┌────────────────────────────────────────────────────────────┐
+│                    MySQL Database                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐   │
+│  │    Users    │  │   Products  │  │      Orders       │   │
+│  │ • Auth Data │  │ • Inventory │  │ • Transactions    │   │
+│  │ • Profiles  │  │ • Pricing   │  │ • Payments        │   │
+│  │ • Roles     │  │ • Categories│  │ • Shipping        │   │
+│  └─────────────┘  └─────────────┘  └───────────────────┘   │
+│                                                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌───────────────────┐   │
+│  │     Cart    │  │ Order Items │  │     Reviews       │   │
+│  │ • Session   │  │ • Line Items│  │ • Ratings         │   │
+│  │ • Temporary │  │ • Pricing   │  │ • Comments        │   │
+│  │ • Merge     │  │ • Taxes     │  │ • Moderation      │   │
+│  └─────────────┘  └─────────────┘  └───────────────────┘   │
+└────────────────────────────────────────────────────────────┘
+
+## 🔄 Workflow & Data Flow
+### 1. Authentication Flow
+```js
+Client → POST /api/auth/login → Auth Controller → User Model → DB
+      ← JWT Token + User Data ← Success Response ← Hash Compare ←
+```
+
+### 2. Product Browsing Flow
+```js
+Client → GET /api/products → Product Controller → Product Model → DB
+      ← Paginated Products ← Filter/Sort Processing ← Query Optimization ←
+```
+
+### 3. Cart Management Flow
+```js
+Client → POST /api/cart → Cart Controller → Cart Model → DB
+      ← Cart Item Added ← Stock Validation ← Price Verification ←
+```
+
+### 4. Order Processing Flow
+```js
+Client → POST /api/orders → Order Controller → Transaction → Multiple Models → DB
+      ← Order Confirmation ← Payment Processing ← Stock Deduction ← Cart Clear ←
+```
+
+---
 ## 🛠️ Technologies Used
 
 ### 🖥️ Backend Technologies
@@ -349,29 +428,40 @@ client/
 * `DELETE /api/cart/:cart_id` – Remove item from cart
 * `DELETE /api/cart` – Clear entire cart
 
+### 🛒 Order Management
+* `GET /api/orders/user` – Get user's orders
+* `GET /api/orders/:order_id` – Get user specific order
+* `GET /api/orders/` – Display all orders for management (Admins Only)
+* `GET /api/orders/stats` – Display all orders stst (Admins Only)
+* `POST /api/orders/` – Create new order
+* `PUT /api/orders/:order_id/status` – Update order status (Admins Only)
+* `PUT /api/orders/:order_id/payment` – Update order status (payments) (Admins Only)
+* `PUT /api/orders/:order_id/cancel` – Update order status (cancellation)
+* `DELETE /api/orders/:order_id` – Delete Order (Admins Only)
+
 ---
 ## 🔒 Security Features
 * Helmet.js security headers
 * CORS configuration
 * CSRF protection
-* SQL injection prevention
-* Input validation with `express-validator`
-* Rate limiting
-* Secure JWT refresh mechanism
+* SQL injection prevention 
+* Input validation and Sanitization with `express-validator`
+* Rate limiting with `express-rate-limit`
+* Secure JWT refresh mechanism 
 
 ---
 ## 📱 Dashboards
 ### User Dashboard
 * Booking history
 * Upcoming reservations
-* Cancellation & rescheduling
 * Profile management
 * Booking status tracking
 
 ### Admin Dashboard
 * Booking overview
 * User management
-* Time slot control
+* Product management
+* Order management
 * System analytics
 * Platform configuration
 
@@ -390,6 +480,11 @@ The name**Amazon** is used strictly as a conceptual reference for learning and p
 *All trademarks, service marks, and brand names referenced remain the property of their respective owners*.
 
 This software and associated documentation are proprietary and confidential. No part of this project may be reproduced, distributed, or transmitted in any form without prior written permission from the author.
+---
+## 💭 A Personal Note
+*This system design represents my **first major step into backend engineering** following industry best practices. **While I acknowledge this isn't a 100% complete, fully integrated business service, this project marks a significant milestone in my career development.***
+
+*As I transition from learning concepts to implementing real-world systems, I'm embracing the complexity and responsibility that comes with backend engineering. This **Amazon-like e-commerce platform** isn't just another CRUD application it's my foundation for understanding how robust, scalable systems are built.*
 ---
 ## 👥 Author
 * **Ahmed Medhat** – Full Stack Web Developer
