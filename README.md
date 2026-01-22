@@ -70,10 +70,12 @@ server/
 │   │   ├── adminController.js
 │   │   ├── authController.js
 │   │   ├── cartController.js
+│   │   ├── orderController.js
 │   │   └── productController.js
 │   ├── models/
 │   │   ├── Cart.js
 │   │   ├── Product.js
+│   │   ├── Order.js
 │   │   └── User.js
 │   ├── middlewares/
 │   │   ├── adminMiddleware.js
@@ -83,6 +85,7 @@ server/
 │       ├── authValidation.js
 │       ├── adminValidation.js
 │       ├── cartValidation.js
+│       ├── orderValidation.js
 │       └── productValidation.js
 ├── config/
 │   └── database.js
@@ -92,6 +95,7 @@ server/
 │   │   ├── authRoutes.routes.js
 │   │   ├── userRoutes.routes.js
 │   │   ├── cartRoutes.routes.js
+│   │   ├── orderRoutes.routes.js
 │   │   └── productRoutes.routes.js
 │   └── web/
 │       └── license.js
@@ -131,9 +135,11 @@ client/
 │   │   │   │   ├── ProductCard.jsx
 │   │   │   │   ├── CategorizedProducts.jsx
 │   │   │   │   ├── CategoriesGrid.jsx
+│   │   │   │   ├── CheckoutPage.jsx
 │   │   │   │   └── CartSidebar.jsx
 │   │   │   ├── admin/
 │   │   │   │   ├── ProductManagement.jsx
+│   │   │   │   ├── OrderManagement.jsx
 │   │   │   │   └── UserManagement.jsx
 │   │   │   ├── HomePage.jsx
 │   │   │   ├── Header.jsx
@@ -141,6 +147,7 @@ client/
 │   │   │   ├── Footer.jsx
 │   │   │   ├── SearchBar.jsx
 │   │   │   ├── AddToCartButton.jsx
+│   │   │   ├── UserOrders.jsx
 │   │   │   ├── NotFound.jsx
 │   │   │   └── UnauthorizedPage.jsx
 │   │   ├── layout/
